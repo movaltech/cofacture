@@ -1,5 +1,6 @@
 # cofacture
 
+[![CI](https://github.com/diegofxm/cofacture/actions/workflows/ci.yml/badge.svg)](https://github.com/diegofxm/cofacture/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/diegofxm/cofacture.svg)](https://pkg.go.dev/github.com/diegofxm/cofacture)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/diegofxm/cofacture)](go.mod)
