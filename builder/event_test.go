@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/diegofxm/cofacture/domain"
-	"github.com/diegofxm/cofacture/event"
+	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/event"
 )
 
 func sampleEvent() domain.Event {

@@ -78,7 +78,7 @@ Initial release.
   contract, for both habilitación and producción.
 - Response parser turning DIAN's validation output into a structured result.
 
-[0.2.0]: https://github.com/diegofxm/cofacture/compare/v0.1.2...v0.2.0
-[0.1.2]: https://github.com/diegofxm/cofacture/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/diegofxm/cofacture/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/diegofxm/cofacture/releases/tag/v0.1.0
+[0.2.0]: https://github.com/movaltech/cofacture/compare/v0.1.2...v0.2.0
+[0.1.2]: https://github.com/movaltech/cofacture/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/movaltech/cofacture/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/movaltech/cofacture/releases/tag/v0.1.0

@@ -5,7 +5,7 @@ package builder
 
 import (
 	"github.com/beevik/etree"
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // appendDiscrepancyResponse adds cac:DiscrepancyResponse — the note's reason. Only called when

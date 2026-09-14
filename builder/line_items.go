@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/beevik/etree"
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // documentTypeCodesUsingMandante is the closed set of document types whose Item carries

@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/beevik/etree"
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 func generateTestCert(t *testing.T) (*x509.Certificate, *rsa.PrivateKey) {

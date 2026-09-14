@@ -6,7 +6,7 @@ package cuds
 import (
 	"testing"
 
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // TestCompute verifies the CUDS formula: SHA-384 over

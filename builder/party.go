@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/beevik/etree"
-	"github.com/diegofxm/cofacture/domain"
-	ubl "github.com/diegofxm/cofacture/xml"
+	"github.com/movaltech/cofacture/domain"
+	ubl "github.com/movaltech/cofacture/xml"
 )
 
 // appendAccountingParty adds AccountingSupplierParty or AccountingCustomerParty.

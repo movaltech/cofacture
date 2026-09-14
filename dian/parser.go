@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/diegofxm/cofacture/domain"
-	"github.com/diegofxm/cofacture/soap"
+	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/soap"
 )
 
 // ValidatorID is the fixed literal DIAN uses as the validator identifier, confirmed both in

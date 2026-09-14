@@ -1,9 +1,9 @@
 # cofacture
 
-[![CI](https://github.com/diegofxm/cofacture/actions/workflows/ci.yml/badge.svg)](https://github.com/diegofxm/cofacture/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/diegofxm/cofacture.svg)](https://pkg.go.dev/github.com/diegofxm/cofacture)
+[![CI](https://github.com/movaltech/cofacture/actions/workflows/ci.yml/badge.svg)](https://github.com/movaltech/cofacture/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/movaltech/cofacture.svg)](https://pkg.go.dev/github.com/movaltech/cofacture)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/diegofxm/cofacture)](go.mod)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/movaltech/cofacture)](go.mod)
 
 A Go library for Colombian DIAN electronic invoicing: UBL 2.1 document generation, XAdES-EPES digital signing, CUFE/CUDE/CUDS/CUNE computation, and a SOAP client for DIAN's `WcfDianCustomerServices` web services.
 
@@ -24,7 +24,7 @@ A Go library for Colombian DIAN electronic invoicing: UBL 2.1 document generatio
 ## Installation
 
 ```bash
-go get github.com/diegofxm/cofacture
+go get github.com/movaltech/cofacture
 ```
 
 Requires Go 1.26.4 or newer (see `go.mod`).
@@ -44,15 +44,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/diegofxm/cofacture/builder"
-	"github.com/diegofxm/cofacture/cufe"
-	"github.com/diegofxm/cofacture/dian"
-	"github.com/diegofxm/cofacture/domain"
-	"github.com/diegofxm/cofacture/qr"
-	"github.com/diegofxm/cofacture/securitycode"
-	"github.com/diegofxm/cofacture/signer"
-	"github.com/diegofxm/cofacture/soap"
-	cfzip "github.com/diegofxm/cofacture/zip"
+	"github.com/movaltech/cofacture/builder"
+	"github.com/movaltech/cofacture/cufe"
+	"github.com/movaltech/cofacture/dian"
+	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/qr"
+	"github.com/movaltech/cofacture/securitycode"
+	"github.com/movaltech/cofacture/signer"
+	"github.com/movaltech/cofacture/soap"
+	cfzip "github.com/movaltech/cofacture/zip"
 )
 
 func main() {

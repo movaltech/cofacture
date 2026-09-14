@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // update regenerates testdata/invoice_golden.xml from the builder's current output.

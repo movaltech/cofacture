@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 func sampleDebitNote() domain.DebitNote {

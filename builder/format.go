@@ -6,7 +6,7 @@ package builder
 import (
 	"fmt"
 
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // formatAmount renders cents as the 2-decimal string DIAN requires.

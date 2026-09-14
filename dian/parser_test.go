@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/diegofxm/cofacture/soap"
+	"github.com/movaltech/cofacture/soap"
 )
 
 func TestParseMessage(t *testing.T) {

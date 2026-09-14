@@ -13,8 +13,8 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 
-	"github.com/diegofxm/cofacture/domain"
-	"github.com/diegofxm/cofacture/internal/dianhash"
+	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/internal/dianhash"
 )
 
 // Compute calculates the CUFE of an Electronic Sales Invoice.

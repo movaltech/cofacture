@@ -7,7 +7,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // Cune computes the Unique Electronic Payroll Code (Código Único de Nómina Electrónica, CUNE)

@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/diegofxm/cofacture/domain"
+	"github.com/movaltech/cofacture/domain"
 )
 
 // samplePOSCreditAdjustment builds a "Nota de Ajuste de tipo crédito al Documento Equivalente"

@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/beevik/etree"
-	"github.com/diegofxm/cofacture/domain"
-	ubl "github.com/diegofxm/cofacture/xml"
+	"github.com/movaltech/cofacture/domain"
+	ubl "github.com/movaltech/cofacture/xml"
 )
 
 // BuildAdjustmentNote builds the XML tree of an Adjustment Note to the Support Document
