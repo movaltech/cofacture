@@ -1,3 +1,4 @@
+// Deprecated: this module has moved to github.com/movaltech/cofacture.
 module github.com/diegofxm/cofacture
 
 go 1.26.4
