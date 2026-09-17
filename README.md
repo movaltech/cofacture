@@ -180,6 +180,18 @@ A Documento Equivalente Electrónico (e.g. a POS ticket) is `builder.BuildInvoic
 
 ---
 
+## Catalog data
+
+`cofacture` intentionally doesn't ship or validate DIAN's reference catalogs (departments, municipalities, document types, tax types, and so on) — see [Design boundaries](#design-boundaries-not-gaps) above. If your application needs that data, [`dian-catalogs`](https://github.com/movaltech/dian-catalogs) is a separate, versioned JSON dataset compiled from DIAN's Technical Annex and public standard code lists — no dependency on this library, or on Go at all:
+
+```
+https://cdn.jsdelivr.net/gh/movaltech/dian-catalogs@v1.0.0/catalogs/departments.json
+```
+
+Always pin an exact version in the URL (`@v1.0.0`) rather than tracking a branch, so a future catalog update never changes behavior under you without notice.
+
+---
+
 ## Package map
 
 | Package | Responsibility |
