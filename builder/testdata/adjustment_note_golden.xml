@@ -79,7 +79,7 @@
     </cac:Party>
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
-    <cbc:AdditionalAccountID>2</cbc:AdditionalAccountID>
+    <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
     <cac:Party>
       <cac:PartyName>
         <cbc:Name>MI EMPRESA S.A.S.</cbc:Name>

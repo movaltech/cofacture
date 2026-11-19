@@ -23,7 +23,7 @@ func sampleSupportDocument() domain.Document {
 	// Roles reversed: Supplier = third party not obligated to invoice (SNO), Customer = issuer.
 	// DIAN requires schemeName="31" (NIT) for the SNO — verified in DS-real.xml.
 	sup.Supplier = domain.Party{
-		EntityTypeCode: "2",
+		EntityTypeCode: "2", // natural person
 		Identification: domain.Identification{
 			Number:           "1020304050",
 			TypeCode:         "31",
@@ -46,7 +46,7 @@ func sampleSupportDocument() domain.Document {
 	}
 	// Customer = the issuing company (same data as the original Supplier in sampleInvoice).
 	sup.Customer = domain.Party{
-		EntityTypeCode: "2",
+		EntityTypeCode: "1", // legal entity
 		Identification: domain.Identification{
 			Number:           "900123456",
 			TypeCode:         "31",
