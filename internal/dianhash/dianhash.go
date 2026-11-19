@@ -7,7 +7,7 @@
 // it is not a public API of the module.
 package dianhash
 
-import "github.com/movaltech/cofacture/domain"
+import "github.com/movaltech/cofacture/v2/domain"
 
 // Seed builds the input string for the SHA-384 hash shared by CUFE and CUDE: same fields,
 // same order. The only thing that differs between the two is lastSeedComponent (the numbering

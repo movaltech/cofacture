@@ -4,6 +4,7 @@
 package soap
 
 import (
+	"context"
 	"encoding/base64"
 
 	"github.com/beevik/etree"
@@ -13,11 +14,11 @@ import (
 // UploadDocumentResponse — if ZipKey comes back empty, check ErrorMessageList (DIAN rejected
 // the ZIP during initial validation, before queueing it). The actual validation result is
 // queried afterward with GetStatusZip(ZipKey).
-func (c *Client) SendTestSetAsync(fileName string, content []byte, testSetID string) (*UploadDocumentResponse, error) {
+func (c *Client) SendTestSetAsync(ctx context.Context, fileName string, content []byte, testSetID string) (*UploadDocumentResponse, error) {
 	var result struct {
 		Result UploadDocumentResponse `xml:"SendTestSetAsyncResult"`
 	}
-	err := c.call("SendTestSetAsync", func(body *etree.Element) {
+	err := c.call(ctx, "SendTestSetAsync", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendTestSetAsync")
 		el.CreateElement("wcf:fileName").SetText(fileName)
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
@@ -33,11 +34,11 @@ func (c *Client) SendTestSetAsync(fileName string, content []byte, testSetID str
 // immediately (a synchronous process, Technical Annex 1.9 section 7.10) — unlike
 // SendTestSetAsync/SendBillAsync, there is no ZipKey or later query step; the DianResponse
 // itself already carries StatusCode/IsValid.
-func (c *Client) SendBillSync(fileName string, content []byte) (*DianResponse, error) {
+func (c *Client) SendBillSync(ctx context.Context, fileName string, content []byte) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"SendBillSyncResult"`
 	}
-	err := c.call("SendBillSync", func(body *etree.Element) {
+	err := c.call(ctx, "SendBillSync", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendBillSync")
 		el.CreateElement("wcf:fileName").SetText(fileName)
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
@@ -52,11 +53,11 @@ func (c *Client) SendBillSync(fileName string, content []byte) (*DianResponse, e
 // section 7.8) — same pattern as SendTestSetAsync (returns a ZipKey, the actual result is
 // queried later with GetStatusZip), but without testSetId: it's for normal submissions, not
 // the certification test set.
-func (c *Client) SendBillAsync(fileName string, content []byte) (*UploadDocumentResponse, error) {
+func (c *Client) SendBillAsync(ctx context.Context, fileName string, content []byte) (*UploadDocumentResponse, error) {
 	var result struct {
 		Result UploadDocumentResponse `xml:"SendBillAsyncResult"`
 	}
-	err := c.call("SendBillAsync", func(body *etree.Element) {
+	err := c.call(ctx, "SendBillAsync", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendBillAsync")
 		el.CreateElement("wcf:fileName").SetText(fileName)
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
@@ -71,11 +72,11 @@ func (c *Client) SendBillAsync(fileName string, content []byte) (*UploadDocument
 // SendBillAsync (fileName + contentFile -> UploadDocumentResponse, poll with GetStatusZip).
 // Confirmed present in the real certification-environment WSDL
 // (WcfDianCustomerServices.svc?singleWsdl) as its own operation, distinct from SendBillAsync.
-func (c *Client) SendBillAttachmentAsync(fileName string, content []byte) (*UploadDocumentResponse, error) {
+func (c *Client) SendBillAttachmentAsync(ctx context.Context, fileName string, content []byte) (*UploadDocumentResponse, error) {
 	var result struct {
 		Result UploadDocumentResponse `xml:"SendBillAttachmentAsyncResult"`
 	}
-	err := c.call("SendBillAttachmentAsync", func(body *etree.Element) {
+	err := c.call(ctx, "SendBillAttachmentAsync", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendBillAttachmentAsync")
 		el.CreateElement("wcf:fileName").SetText(fileName)
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
@@ -88,13 +89,13 @@ func (c *Client) SendBillAttachmentAsync(fileName string, content []byte) (*Uplo
 
 // GetStatusZip queries the validation result of a ZIP sent via SendBillAsync or
 // SendTestSetAsync. A ZIP can contain several documents, hence the slice return.
-func (c *Client) GetStatusZip(trackID string) ([]DianResponse, error) {
+func (c *Client) GetStatusZip(ctx context.Context, trackID string) ([]DianResponse, error) {
 	var result struct {
 		Result struct {
 			Items []DianResponse `xml:"DianResponse"`
 		} `xml:"GetStatusZipResult"`
 	}
-	err := c.call("GetStatusZip", func(body *etree.Element) {
+	err := c.call(ctx, "GetStatusZip", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetStatusZip")
 		el.CreateElement("wcf:trackId").SetText(trackID)
 	}, &result)
@@ -105,11 +106,11 @@ func (c *Client) GetStatusZip(trackID string) ([]DianResponse, error) {
 }
 
 // GetStatus queries the validation result of a single document sent via SendBillSync.
-func (c *Client) GetStatus(trackID string) (*DianResponse, error) {
+func (c *Client) GetStatus(ctx context.Context, trackID string) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"GetStatusResult"`
 	}
-	err := c.call("GetStatus", func(body *etree.Element) {
+	err := c.call(ctx, "GetStatus", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetStatus")
 		el.CreateElement("wcf:trackId").SetText(trackID)
 	}, &result)
@@ -125,11 +126,11 @@ func (c *Client) GetStatus(trackID string) (*DianResponse, error) {
 // Returns every active and historical range DIAN has for that issuer/software pair, each with
 // its resolution, prefix, from/to, validity dates and the TechnicalKey needed to compute the
 // CUFE.
-func (c *Client) GetNumberingRange(accountCode, accountCodeT, softwareCode string) (*NumberRangeResponseList, error) {
+func (c *Client) GetNumberingRange(ctx context.Context, accountCode, accountCodeT, softwareCode string) (*NumberRangeResponseList, error) {
 	var result struct {
 		Result NumberRangeResponseList `xml:"GetNumberingRangeResult"`
 	}
-	err := c.call("GetNumberingRange", func(body *etree.Element) {
+	err := c.call(ctx, "GetNumberingRange", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetNumberingRange")
 		el.CreateElement("wcf:accountCode").SetText(accountCode)
 		el.CreateElement("wcf:accountCodeT").SetText(accountCodeT)
@@ -144,11 +145,11 @@ func (c *Client) GetNumberingRange(accountCode, accountCodeT, softwareCode strin
 // SendNominaSync sends a ZIP with a signed NominaIndividual (or NominaIndividualDeAjuste) and
 // returns the validation result synchronously (Payroll Technical Annex, section 9.7). Unlike
 // SendBillSync, it only takes contentFile (no fileName).
-func (c *Client) SendNominaSync(content []byte) (*DianResponse, error) {
+func (c *Client) SendNominaSync(ctx context.Context, content []byte) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"SendNominaSyncResult"`
 	}
-	err := c.call("SendNominaSync", func(body *etree.Element) {
+	err := c.call(ctx, "SendNominaSync", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendNominaSync")
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
 	}, &result)
@@ -160,11 +161,11 @@ func (c *Client) SendNominaSync(content []byte) (*DianResponse, error) {
 
 // SendNominaSyncTestSet sends a payroll ZIP to the certification test set. Combines
 // SendNominaSync's logic with the testSetId required for certification.
-func (c *Client) SendNominaSyncTestSet(content []byte, testSetID string) (*DianResponse, error) {
+func (c *Client) SendNominaSyncTestSet(ctx context.Context, content []byte, testSetID string) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"SendNominaSyncResult"`
 	}
-	err := c.call("SendNominaSync", func(body *etree.Element) {
+	err := c.call(ctx, "SendNominaSync", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendNominaSync")
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
 		el.CreateElement("wcf:testSetId").SetText(testSetID)
@@ -180,11 +181,11 @@ func (c *Client) SendNominaSyncTestSet(content []byte, testSetID string) (*DianR
 // and friends) and returns the validation result synchronously, same response shape as
 // SendBillSync/SendNominaSync. Confirmed present in the real certification-environment WSDL
 // (WcfDianCustomerServices.svc?singleWsdl) as its own operation.
-func (c *Client) SendEventUpdateStatus(content []byte) (*DianResponse, error) {
+func (c *Client) SendEventUpdateStatus(ctx context.Context, content []byte) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"SendEventUpdateStatusResult"`
 	}
-	err := c.call("SendEventUpdateStatus", func(body *etree.Element) {
+	err := c.call(ctx, "SendEventUpdateStatus", func(body *etree.Element) {
 		el := body.CreateElement("wcf:SendEventUpdateStatus")
 		el.CreateElement("wcf:contentFile").SetText(base64.StdEncoding.EncodeToString(content))
 	}, &result)
@@ -196,11 +197,11 @@ func (c *Client) SendEventUpdateStatus(content []byte) (*DianResponse, error) {
 
 // GetStatusEvent queries the validation result of an event sent via SendEventUpdateStatus, same
 // pattern as GetStatus for SendBillSync.
-func (c *Client) GetStatusEvent(trackID string) (*DianResponse, error) {
+func (c *Client) GetStatusEvent(ctx context.Context, trackID string) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"GetStatusEventResult"`
 	}
-	err := c.call("GetStatusEvent", func(body *etree.Element) {
+	err := c.call(ctx, "GetStatusEvent", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetStatusEvent")
 		el.CreateElement("wcf:trackId").SetText(trackID)
 	}, &result)
@@ -213,11 +214,11 @@ func (c *Client) GetStatusEvent(trackID string) (*DianResponse, error) {
 // GetAcquirer queries DIAN's exchange/notification registry for a third party — see
 // AcquirerResponse. An optional aid when capturing a NIT, never blocking: an empty result (no
 // ReceiverName/ReceiverEmail) is normal and expected for most identification numbers.
-func (c *Client) GetAcquirer(identificationType, identificationNumber string) (*AcquirerResponse, error) {
+func (c *Client) GetAcquirer(ctx context.Context, identificationType, identificationNumber string) (*AcquirerResponse, error) {
 	var result struct {
 		Result AcquirerResponse `xml:"GetAcquirerResult"`
 	}
-	err := c.call("GetAcquirer", func(body *etree.Element) {
+	err := c.call(ctx, "GetAcquirer", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetAcquirer")
 		el.CreateElement("wcf:identificationType").SetText(identificationType)
 		el.CreateElement("wcf:identificationNumber").SetText(identificationNumber)
@@ -228,15 +229,15 @@ func (c *Client) GetAcquirer(identificationType, identificationNumber string) (*
 	return &result.Result, nil
 }
 
-// GetXmlByDocumentKey retrieves the original signed XML (base64-encoded, in
-// XMLByDocumentKeyResponse.XmlBytesBase64) of a document previously submitted via
+// GetXMLByDocumentKey retrieves the original signed XML (base64-encoded, in
+// XMLByDocumentKeyResponse.XMLBytesBase64) of a document previously submitted via
 // SendBillSync/SendBillAsync/SendTestSetAsync, given the TrackId/document key returned at
 // submission time.
-func (c *Client) GetXmlByDocumentKey(trackID string) (*XMLByDocumentKeyResponse, error) {
+func (c *Client) GetXMLByDocumentKey(ctx context.Context, trackID string) (*XMLByDocumentKeyResponse, error) {
 	var result struct {
 		Result XMLByDocumentKeyResponse `xml:"GetXmlByDocumentKeyResult"`
 	}
-	err := c.call("GetXmlByDocumentKey", func(body *etree.Element) {
+	err := c.call(ctx, "GetXmlByDocumentKey", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetXmlByDocumentKey")
 		el.CreateElement("wcf:trackId").SetText(trackID)
 	}, &result)
@@ -251,11 +252,11 @@ func (c *Client) GetXmlByDocumentKey(trackID string) (*XMLByDocumentKeyResponse,
 // type SendBillSync/GetStatus use), which is unusual for a query operation; this has not been
 // exercised against DIAN's certification environment, so which of DianResponse's fields
 // actually carry data here (as opposed to being left empty) is unconfirmed.
-func (c *Client) GetReferenceNotes(trackID string) (*DianResponse, error) {
+func (c *Client) GetReferenceNotes(ctx context.Context, trackID string) (*DianResponse, error) {
 	var result struct {
 		Result DianResponse `xml:"GetReferenceNotesResult"`
 	}
-	err := c.call("GetReferenceNotes", func(body *etree.Element) {
+	err := c.call(ctx, "GetReferenceNotes", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetReferenceNotes")
 		el.CreateElement("wcf:trackId").SetText(trackID)
 	}, &result)
@@ -267,13 +268,13 @@ func (c *Client) GetReferenceNotes(trackID string) (*DianResponse, error) {
 
 // GetDocumentInfo queries full metadata for a document identified by UUID (parties, taxes,
 // referencing notes/events, validations) without downloading its XML — a heavier query than
-// GetStatus, lighter than GetXmlByDocumentKey. See DocumentInfoResponse's doc comment for the
+// GetStatus, lighter than GetXMLByDocumentKey. See DocumentInfoResponse's doc comment for the
 // same not-yet-confirmed-against-real-DIAN caveat as GetReferenceNotes.
-func (c *Client) GetDocumentInfo(documentUUID string) (*DocumentInfoResponse, error) {
+func (c *Client) GetDocumentInfo(ctx context.Context, documentUUID string) (*DocumentInfoResponse, error) {
 	var result struct {
 		Result DocumentInfoResponse `xml:"GetDocumentInfoResult"`
 	}
-	err := c.call("GetDocumentInfo", func(body *etree.Element) {
+	err := c.call(ctx, "GetDocumentInfo", func(body *etree.Element) {
 		el := body.CreateElement("wcf:GetDocumentInfo")
 		el.CreateElement("wcf:uuid").SetText(documentUUID)
 	}, &result)
@@ -286,11 +287,11 @@ func (c *Client) GetDocumentInfo(documentUUID string) (*DocumentInfoResponse, er
 // GetExchangeEmails queries the email addresses configured to exchange electronic documents
 // with DIAN's registry, as a base64-encoded CSV (ExchangeEmailResponse.CsvBase64Bytes). Takes
 // no parameters — confirmed in the real WSDL's schema (an empty sequence).
-func (c *Client) GetExchangeEmails() (*ExchangeEmailResponse, error) {
+func (c *Client) GetExchangeEmails(ctx context.Context) (*ExchangeEmailResponse, error) {
 	var result struct {
 		Result ExchangeEmailResponse `xml:"GetExchangeEmailsResult"`
 	}
-	err := c.call("GetExchangeEmails", func(body *etree.Element) {
+	err := c.call(ctx, "GetExchangeEmails", func(body *etree.Element) {
 		body.CreateElement("wcf:GetExchangeEmails")
 	}, &result)
 	if err != nil {

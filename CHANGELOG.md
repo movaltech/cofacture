@@ -5,6 +5,49 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-11-19
+
+The module path is now `github.com/movaltech/cofacture/v2`. Code still using v1 keeps working
+unchanged; to upgrade, run `go get github.com/movaltech/cofacture/v2` and replace
+`github.com/movaltech/cofacture/` with `github.com/movaltech/cofacture/v2/` in your imports.
+
+### Changed
+
+- **Breaking:** every `soap.Client` method takes a `context.Context` as its first argument,
+  e.g. `client.SendBillSync(ctx, fileName, zip)`. The request is built with
+  `http.NewRequestWithContext`, so canceling the context or passing its deadline aborts an
+  in-flight call; `HTTPClient.Timeout` still applies on top of it.
+- **Breaking:** quantities and percentages use `decimal.Decimal`
+  ([github.com/movaltech/decimal](https://github.com/movaltech/decimal)) instead of `float64`:
+  `domain.Line.Quantity`, `domain.Tax.Percent`, `payroll.DeduccionPct.Porcentaje`,
+  `payroll.FondoSP.Porcentaje`/`PorcentajeSub`, and `soap.TotalEImpuestos.Iva`/`Total`. Values are
+  rendered exactly (round half away from zero), so `2.675` at 2 decimals is now `2.68`; float64
+  with `%.2f` printed `2.67`. The XML generated for ordinary values is byte-identical to v1.
+- **Breaking:** exported identifiers follow Go initialisms: `XmlBase64Bytes`, `XmlBytes`,
+  `XmlBytesBase64`, `XmlDocumentKey`, `XmlFileName`, `DocumentTypeId`,
+  `XMLParamsResponseTrackId` and `GetXmlByDocumentKey` are now `XMLBase64Bytes`, `XMLBytes`,
+  `XMLBytesBase64`, `XMLDocumentKey`, `XMLFileName`, `DocumentTypeID`,
+  `XMLParamsResponseTrackID` and `GetXMLByDocumentKey`. XML tags and SOAP action names on the
+  wire are unchanged.
+- SOAP responses are read with a 64 MiB limit.
+- Requires Go 1.26.5 (the minimum of `github.com/movaltech/decimal`).
+
+### Added
+
+- `domain.FormatFixed(d, places)`, the exact fixed-decimal formatter used for quantities and
+  percentages.
+
+### Fixed
+
+- A `.gitattributes` file forces LF line endings. With `core.autocrlf=true` on Windows, the
+  golden-file tests failed after checkout because the XML fixtures were converted to CRLF.
+
+## [1.0.0] — 2026-09-14
+
+### Changed
+
+- Module path is now `github.com/movaltech/cofacture`. No API changes from 0.2.0.
+
 ## [0.2.0] — 2026-09-04
 
 ### Changed

@@ -8,7 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
+	"github.com/movaltech/decimal"
 )
 
 // update regenerates testdata/invoice_golden.xml from the builder's current output.
@@ -82,7 +83,7 @@ func sampleInvoice() domain.Document {
 		},
 
 		HeaderTaxes: []domain.Tax{
-			{TaxableAmountCents: 126050420, TaxAmountCents: 23949580, Percent: 19, TypeCode: "01", TypeName: "IVA"},
+			{TaxableAmountCents: 126050420, TaxAmountCents: 23949580, Percent: decimal.MustParse("19"), TypeCode: "01", TypeName: "IVA"},
 		},
 
 		Totals: domain.Totals{
@@ -95,7 +96,7 @@ func sampleInvoice() domain.Document {
 		Lines: []domain.Line{
 			{
 				Description:        "Laptop Dell Inspiron 15, 8GB RAM, 256GB SSD",
-				Quantity:           1,
+				Quantity:           decimal.MustParse("1"),
 				UnitCode:           "94",
 				LineExtensionCents: 126050420,
 				UnitPriceCents:     126050420,
@@ -106,7 +107,7 @@ func sampleInvoice() domain.Document {
 				// Technical Annex requires that @schemeAgencyID not be used at all (see
 				// section 9.45), not that it be sent with a value of "0".
 				Taxes: []domain.Tax{
-					{TaxableAmountCents: 126050420, TaxAmountCents: 23949580, Percent: 19, TypeCode: "01", TypeName: "IVA"},
+					{TaxableAmountCents: 126050420, TaxAmountCents: 23949580, Percent: decimal.MustParse("19"), TypeCode: "01", TypeName: "IVA"},
 				},
 			},
 		},

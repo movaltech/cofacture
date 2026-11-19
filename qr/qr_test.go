@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 func TestURL(t *testing.T) {

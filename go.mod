@@ -1,10 +1,11 @@
-module github.com/movaltech/cofacture
+module github.com/movaltech/cofacture/v2
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/beevik/etree v1.6.0
 	github.com/google/uuid v1.6.0
+	github.com/movaltech/decimal v1.0.1
 	github.com/russellhaering/goxmldsig v1.6.0
 	software.sslmate.com/src/go-pkcs12 v0.7.2
 )

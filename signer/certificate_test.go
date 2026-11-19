@@ -4,7 +4,6 @@
 package signer
 
 import (
-	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 	"testing"
@@ -23,7 +22,7 @@ func TestLoadPKCS12_WithCAChain(t *testing.T) {
 	leafCert, key := generateTestCert(t)
 	caCert, _ := generateTestCert(t)
 
-	data, err := pkcs12.Encode(rand.Reader, key, leafCert, []*x509.Certificate{caCert}, testP12Password)
+	data, err := pkcs12.LegacyRC2.Encode(key, leafCert, []*x509.Certificate{caCert}, testP12Password)
 	if err != nil {
 		t.Fatalf("pkcs12.Encode: %v", err)
 	}
@@ -45,7 +44,7 @@ func TestLoadPKCS12_WithCAChain(t *testing.T) {
 func TestLoadPKCS12_NoChain(t *testing.T) {
 	cert, key := generateTestCert(t)
 
-	data, err := pkcs12.Encode(rand.Reader, key, cert, nil, testP12Password)
+	data, err := pkcs12.LegacyRC2.Encode(key, cert, nil, testP12Password)
 	if err != nil {
 		t.Fatalf("pkcs12.Encode: %v", err)
 	}
@@ -62,7 +61,7 @@ func TestLoadPKCS12_NoChain(t *testing.T) {
 // TestLoadPKCS12_WrongPassword confirms a wrong password is reported as an error.
 func TestLoadPKCS12_WrongPassword(t *testing.T) {
 	cert, key := generateTestCert(t)
-	data, err := pkcs12.Encode(rand.Reader, key, cert, nil, testP12Password)
+	data, err := pkcs12.LegacyRC2.Encode(key, cert, nil, testP12Password)
 	if err != nil {
 		t.Fatalf("pkcs12.Encode: %v", err)
 	}

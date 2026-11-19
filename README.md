@@ -1,7 +1,7 @@
 # cofacture
 
 [![CI](https://github.com/movaltech/cofacture/actions/workflows/ci.yml/badge.svg)](https://github.com/movaltech/cofacture/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/movaltech/cofacture.svg)](https://pkg.go.dev/github.com/movaltech/cofacture)
+[![Go Reference](https://pkg.go.dev/badge/github.com/movaltech/cofacture/v2.svg)](https://pkg.go.dev/github.com/movaltech/cofacture/v2)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/movaltech/cofacture)](go.mod)
 
@@ -24,10 +24,10 @@ A Go library for Colombian DIAN electronic invoicing: UBL 2.1 document generatio
 ## Installation
 
 ```bash
-go get github.com/movaltech/cofacture
+go get github.com/movaltech/cofacture/v2
 ```
 
-Requires Go 1.26.4 or newer (see `go.mod`).
+Requires Go 1.26.5 or newer (see `go.mod`).
 
 ---
 
@@ -39,23 +39,28 @@ The full pipeline for a single invoice, end to end. Error handling is abbreviate
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/movaltech/cofacture/builder"
-	"github.com/movaltech/cofacture/cufe"
-	"github.com/movaltech/cofacture/dian"
-	"github.com/movaltech/cofacture/domain"
-	"github.com/movaltech/cofacture/qr"
-	"github.com/movaltech/cofacture/securitycode"
-	"github.com/movaltech/cofacture/signer"
-	"github.com/movaltech/cofacture/soap"
-	cfzip "github.com/movaltech/cofacture/zip"
+	"github.com/movaltech/cofacture/v2/builder"
+	"github.com/movaltech/cofacture/v2/cufe"
+	"github.com/movaltech/cofacture/v2/dian"
+	"github.com/movaltech/cofacture/v2/domain"
+	"github.com/movaltech/cofacture/v2/qr"
+	"github.com/movaltech/cofacture/v2/securitycode"
+	"github.com/movaltech/cofacture/v2/signer"
+	"github.com/movaltech/cofacture/v2/soap"
+	cfzip "github.com/movaltech/cofacture/v2/zip"
 )
 
 func main() {
+	// Every DIAN call takes a context: cancel it or give it a deadline to abort the request.
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
 	// 1. Load your DIAN-issued certificate (.p12) once, reuse it across documents — for both
 	//    XAdES document signing and the SOAP WS-Security header.
 	certBytes, _ := os.ReadFile("software.p12")
@@ -67,7 +72,7 @@ func main() {
 	// 2. Query the numbering range DIAN authorized for your issuer + software pair (cache the
 	//    result — it doesn't change per document). technicalKey feeds cufe.Compute() below.
 	client := soap.New(soap.HabilitacionURL, cert, key)
-	ranges, err := client.GetNumberingRange("900123456", "900123456", softwareUUID)
+	ranges, err := client.GetNumberingRange(ctx, "900123456", "900123456", softwareUUID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -77,6 +82,8 @@ func main() {
 	//    (ERP, database, order service, etc.) — cofacture never reaches out to fetch it.
 	//    supplierParty, customerParty, headerTaxes, totals, lines and softwareProvider below
 	//    are placeholders for values you supply.
+	//    Money is int64 cents; quantities and tax percentages are decimal.Decimal values from
+	//    github.com/movaltech/decimal, e.g. Quantity: decimal.MustParse("2.5").
 	inv := domain.Document{
 		ProfileID:         "DIAN 2.1: Factura Electrónica de Venta",
 		EnvironmentCode:   "2", // "1" production, "2" certification (habilitación)
@@ -135,7 +142,7 @@ func main() {
 	}
 
 	// 7. Send it to DIAN and interpret the response.
-	resp, err := client.SendBillSync(fileName, zipBytes)
+	resp, err := client.SendBillSync(ctx, fileName, zipBytes)
 	if err != nil {
 		log.Fatal(err)
 	}

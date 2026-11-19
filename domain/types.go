@@ -11,6 +11,8 @@
 // itself is valid.
 package domain
 
+import "github.com/movaltech/decimal"
+
 // Identification represents a third party's identification number (NIT, national ID, etc.)
 // along with the attributes DIAN requires in the schemeID/schemeName schemas.
 type Identification struct {
@@ -43,10 +45,10 @@ type Party struct {
 	// serialized joined with ";" in a single cbc:TaxLevelCode, not one element per code.
 	LiabilityCodes []string
 	// IndustryClassificationCodes are the CIIU codes (DANE catalog, not DIAN — hence there is
-	// no catalog table validating them, only a cardinality limit enforced by whoever builds
-	// the Party, see companies.Service.validateCompany). Only applies to the supplier, never
-	// to the customer (the Technical Annex describes it as "the issuer's economic activity
-	// code"). Serialized joined with ";" in a single cbc:IndustryClassificationCode.
+	// no catalog table validating them; any cardinality limit is up to whoever builds the
+	// Party). Only applies to the supplier, never to the customer (the Technical Annex
+	// describes it as "the issuer's economic activity code"). Serialized joined with ";" in a
+	// single cbc:IndustryClassificationCode.
 	IndustryClassificationCodes []string
 	TaxSchemeCode               string
 	TaxSchemeName               string
@@ -63,8 +65,8 @@ type Party struct {
 type Tax struct {
 	TaxableAmountCents int64
 	TaxAmountCents     int64
-	Percent            float64
-	TypeCode           string // tax_types catalog, e.g. "01" = VAT
+	Percent            decimal.Decimal // e.g. decimal.MustParse("19"); rendered with 2 decimals
+	TypeCode           string          // tax_types catalog, e.g. "01" = VAT
 	TypeName           string
 }
 
@@ -77,8 +79,8 @@ type ReferencePrice struct {
 // Line is a detail line (InvoiceLine / CreditNoteLine / DebitNoteLine).
 type Line struct {
 	Description        string
-	Quantity           float64
-	UnitCode           string // unit_codes catalog, e.g. "94"
+	Quantity           decimal.Decimal // rendered with 6 decimals
+	UnitCode           string          // unit_codes catalog, e.g. "94"
 	LineExtensionCents int64
 	UnitPriceCents     int64
 	FreeOfCharge       bool

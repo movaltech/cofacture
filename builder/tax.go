@@ -5,7 +5,7 @@ package builder
 
 import (
 	"github.com/beevik/etree"
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // appendWithholdingTaxTotal adds a cac:WithholdingTaxTotal for each withholding on the Support

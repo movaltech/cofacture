@@ -13,6 +13,8 @@
 // stays obvious — only the doc comments are in English.
 package payroll
 
+import "github.com/movaltech/decimal"
+
 // Nomina gathers all the data needed to generate, sign and send a NominaIndividual or
 // NominaIndividualDeAjuste.
 type Nomina struct {
@@ -158,14 +160,14 @@ type Deducciones struct {
 
 // DeduccionPct is a deduction defined by percentage and amount.
 type DeduccionPct struct {
-	Porcentaje     float64
+	Porcentaje     decimal.Decimal
 	DeduccionCents int64
 }
 
 // FondoSP is the deduction for the Solidarity Pension Fund (Fondo de Solidaridad Pensional).
 type FondoSP struct {
-	Porcentaje        float64
+	Porcentaje        decimal.Decimal
 	DeduccionSPCents  int64
-	PorcentajeSub     float64
+	PorcentajeSub     decimal.Decimal
 	DeduccionSubCents int64
 }

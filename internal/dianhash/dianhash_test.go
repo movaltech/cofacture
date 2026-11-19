@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // TestSeed_AnexoTecnicoExample uses the same official worked example from section 11.2.1 of the
