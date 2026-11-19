@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 
-	"software.sslmate.com/src/go-pkcs12"
+	"github.com/movaltech/cofacture/v2/internal/pkcs12"
 )
 
 // LoadPEM loads a certificate and its RSA private key from PEM bytes (typically two separate
@@ -44,6 +44,10 @@ func LoadPEM(certPEM, keyPEM []byte) (*x509.Certificate, *rsa.PrivateKey, error)
 // which real-world certificates routinely violate. The chain itself is discarded: DIAN's
 // XAdES-EPES signature only ever embeds the leaf certificate (ds:X509Certificate), confirmed
 // against real accepted invoices — see cofacture/signer's own package doc comment.
+//
+// Both DER and BER files are accepted. Certificates exported with Java tools are BER
+// (indefinite lengths, content split in chunks) and commonly use legacy RC2-40 encryption;
+// they load as they are, without re-exporting them (see internal/pkcs12).
 func LoadPKCS12(data []byte, password string) (*x509.Certificate, *rsa.PrivateKey, error) {
 	key, cert, _, err := pkcs12.DecodeChain(data, password)
 	if err != nil {
