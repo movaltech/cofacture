@@ -8,7 +8,7 @@ import (
 	"encoding/pem"
 	"testing"
 
-	"software.sslmate.com/src/go-pkcs12"
+	"github.com/movaltech/cofacture/v2/internal/pkcs12"
 )
 
 const testP12Password = "test-password"

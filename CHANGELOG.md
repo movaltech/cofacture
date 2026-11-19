@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-11-19
+
+### Added
+
+- `signer.LoadPKCS12` reads BER-encoded `.p12`/`.pfx` files, as exported by Java tools and
+  issued by several Colombian certificate authorities (indefinite lengths, content split in
+  1000-byte chunks, legacy RC2-40 encryption). They load as they are; before, they failed with
+  `asn1: syntax error: indefinite length found (not DER)` and had to be re-exported with OpenSSL.
+
+### Changed
+
+- PKCS#12 decoding moved from `software.sslmate.com/src/go-pkcs12` v0.7.2 to an internal copy
+  (`internal/pkcs12`, BSD license kept in `internal/pkcs12/LICENSE`) that re-encodes every
+  structure from BER to DER before parsing it. The MAC is still verified over the original
+  bytes. DER files decode exactly as before, and the upstream test suite still passes.
+  `golang.org/x/crypto` becomes a direct dependency.
+
 ## [2.0.1] — 2026-11-19
 
 ### Fixed
