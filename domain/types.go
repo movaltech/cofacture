@@ -35,7 +35,10 @@ type Address struct {
 
 // Party is a supplier or customer (AccountingSupplierParty / AccountingCustomerParty).
 type Party struct {
-	EntityTypeCode string // "1" natural person, "2" legal entity
+	// EntityTypeCode is cbc:AdditionalAccountID, DIAN table 13.2.3 (TipoOrganizacion): "1" legal
+	// entity (persona jurídica), "2" natural person (persona natural). Technical Annex 1.9 rule
+	// FAK19 states it the same way.
+	EntityTypeCode string
 	Identification Identification
 	Name           string
 	Address        Address // omitted from the XML if Line is empty

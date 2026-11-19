@@ -47,12 +47,9 @@
     </cac:InvoiceDocumentReference>
   </cac:BillingReference>
   <cac:AccountingSupplierParty>
-    <cbc:AdditionalAccountID>2</cbc:AdditionalAccountID>
+    <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
     <cac:Party>
       <cbc:IndustryClassificationCode>4661;4669</cbc:IndustryClassificationCode>
-      <cac:PartyIdentification>
-        <cbc:ID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="3" schemeName="31">900123456</cbc:ID>
-      </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>MI EMPRESA S.A.S.</cbc:Name>
       </cac:PartyName>
@@ -108,8 +105,11 @@
     </cac:Party>
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
-    <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
+    <cbc:AdditionalAccountID>2</cbc:AdditionalAccountID>
     <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeName="13">1234567890</cbc:ID>
+      </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>Juan Pérez</cbc:Name>
       </cac:PartyName>

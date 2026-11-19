@@ -34,6 +34,9 @@ func appendAccountingParty(parent *etree.Element, node string, p domain.Party, s
 		party.CreateElement("cbc:IndustryClassificationCode").SetText(strings.Join(p.IndustryClassificationCodes, ";"))
 	}
 
+	// cac:PartyIdentification is expected for natural persons (EntityTypeCode "2"): rule FAK61
+	// makes it mandatory for "consumidor final" and raises a notification when
+	// AdditionalAccountID is "2" and the group is missing.
 	if p.EntityTypeCode == "2" {
 		partyID := party.CreateElement("cac:PartyIdentification").CreateElement("cbc:ID")
 		setIdentificationAttrs(partyID, p.Identification)

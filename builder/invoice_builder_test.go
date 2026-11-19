@@ -37,7 +37,7 @@ func sampleInvoice() domain.Document {
 		CurrencyCode: "COP",
 
 		Supplier: domain.Party{
-			EntityTypeCode: "2",
+			EntityTypeCode: "1", // legal entity
 			Identification: domain.Identification{
 				Number:           "900123456",
 				TypeCode:         "31",
@@ -64,7 +64,7 @@ func sampleInvoice() domain.Document {
 		},
 
 		Customer: domain.Party{
-			EntityTypeCode: "1",
+			EntityTypeCode: "2", // natural person
 			Identification: domain.Identification{
 				Number:   "1234567890",
 				TypeCode: "13",

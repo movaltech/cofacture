@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.1] — 2026-11-19
+
+### Fixed
+
+- The doc comment of `domain.Party.EntityTypeCode` had the codes backwards. DIAN table 13.2.3
+  (TipoOrganizacion) and Technical Annex 1.9 rule FAK19 define `"1"` as legal entity (persona
+  jurídica) and `"2"` as natural person (persona natural). The builder already behaved
+  accordingly (it adds `cac:PartyIdentification` for `"2"`, as rule FAK61 expects for natural
+  persons), but callers following the comment sent the codes swapped. The sample parties in the
+  builder tests and their golden files now use the official codes. No API change.
+
 ## [2.0.0] — 2026-11-19
 
 The module path is now `github.com/movaltech/cofacture/v2`. Code still using v1 keeps working
