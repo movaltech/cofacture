@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/movaltech/cofacture/soap"
+	"github.com/movaltech/cofacture/v2/soap"
 )
 
 func TestParseMessage(t *testing.T) {
@@ -57,7 +57,7 @@ func TestMessage_IsRejection(t *testing.T) {
 }
 
 func TestInterpret_DecodesBase64ApplicationResponse(t *testing.T) {
-	// XmlBase64Bytes arrives as base64 text — encoding/xml never decodes it on its own (it
+	// XMLBase64Bytes arrives as base64 text — encoding/xml never decodes it on its own (it
 	// only copies character data verbatim into a []byte field), so decodeEmbeddedXML's one
 	// base64.StdEncoding.DecodeString call is the only decode step, not a "second layer" of
 	// one Go already did — verified against a real GetStatusZip response.
@@ -68,8 +68,8 @@ func TestInterpret_DecodesBase64ApplicationResponse(t *testing.T) {
 		IsValid:        true,
 		StatusCode:     "00",
 		StatusMessage:  "ha sido autorizada",
-		XmlDocumentKey: "cufe-de-prueba",
-		XmlBase64Bytes: []byte(encoded),
+		XMLDocumentKey: "cufe-de-prueba",
+		XMLBase64Bytes: []byte(encoded),
 	}
 
 	result, err := Interpret(resp)
@@ -98,7 +98,7 @@ func TestResult_HasRejectionsAndToValidationResult(t *testing.T) {
 	result := Result{
 		IsValid:        true,
 		StatusCode:     "00",
-		XmlDocumentKey: "cufe-123",
+		XMLDocumentKey: "cufe-123",
 		Messages: []Message{
 			parseMessage("Regla: FAJ43b, Notificación: algo informativo."),
 		},

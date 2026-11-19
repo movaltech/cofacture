@@ -6,7 +6,7 @@ package cude
 import (
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // TestCompute_CreditNote uses the official example from section 11.4.3/11.4.4 of the

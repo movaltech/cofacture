@@ -9,6 +9,7 @@ import "fmt"
 // (Technical Annex 1.9, section 6.5.7).
 type DocumentKind string
 
+// Document kinds, used as the file-name prefix of each DIAN document type.
 const (
 	KindInvoice             DocumentKind = "fv" // Sales Invoice
 	KindCreditNote          DocumentKind = "nc" // Credit Note

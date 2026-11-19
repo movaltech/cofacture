@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // sampleAdjustmentNote builds an Adjustment Note to the Support Document (InvoiceTypeCode

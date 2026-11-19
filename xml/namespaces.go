@@ -4,6 +4,7 @@
 // Package xml holds the UBL 2.1 + DIAN extension namespace constants shared by all builders.
 package xml
 
+// Namespace URIs and schema locations used by the UBL 2.1 documents and DIAN extensions.
 const (
 	NSInvoiceDefault      = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
 	NSCreditNote          = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"

@@ -7,7 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
+	"github.com/movaltech/decimal"
 )
 
 func sampleSupportDocument() domain.Document {
@@ -74,7 +75,7 @@ func sampleSupportDocument() domain.Document {
 			TypeName:           "ReteRenta",
 			TaxableAmountCents: 126_050_420,
 			TaxAmountCents:     4_411_765,
-			Percent:            3.5,
+			Percent:            decimal.MustParse("3.5"),
 		},
 	}
 

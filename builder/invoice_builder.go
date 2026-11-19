@@ -10,8 +10,8 @@ import (
 	"strconv"
 
 	"github.com/beevik/etree"
-	"github.com/movaltech/cofacture/domain"
-	ubl "github.com/movaltech/cofacture/xml"
+	"github.com/movaltech/cofacture/v2/domain"
+	ubl "github.com/movaltech/cofacture/v2/xml"
 )
 
 // BuildInvoice builds the XML tree of an Electronic Sales Invoice.

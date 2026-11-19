@@ -5,7 +5,7 @@ package builder
 
 import (
 	"github.com/beevik/etree"
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // appendPaymentMean adds cac:PaymentMeans — shared by Invoice, CreditNote and DebitNote (same

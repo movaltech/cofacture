@@ -4,12 +4,12 @@
 // Package dian interprets DIAN's validation responses (soap.DianResponse) and turns them into
 // something the rest of the pipeline can use directly.
 //
-// Verified against a real GetStatusZip response: the XmlBase64Bytes field arrives as base64
+// Verified against a real GetStatusZip response: the XMLBase64Bytes field arrives as base64
 // text that must be decoded to reach the actual ApplicationResponse — encoding/xml does not
 // decode base64 on its own (it only copies an element's character data verbatim into a []byte
 // field, confirmed directly against the standard library), so this one decode step is entirely
-// this package's own doing, not something Go already did for us. XmlBytes, when DIAN uses it
-// instead of XmlBase64Bytes, arrives already as the final content and needs no decode step.
+// this package's own doing, not something Go already did for us. XMLBytes, when DIAN uses it
+// instead of XMLBase64Bytes, arrives already as the final content and needs no decode step.
 package dian
 
 import (
@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/movaltech/cofacture/domain"
-	"github.com/movaltech/cofacture/soap"
+	"github.com/movaltech/cofacture/v2/domain"
+	"github.com/movaltech/cofacture/v2/soap"
 )
 
 // ValidatorID is the fixed literal DIAN uses as the validator identifier, confirmed both in
@@ -71,10 +71,10 @@ type Result struct {
 	StatusMessage     string
 	Messages          []Message
 
-	// XmlDocumentKey is the identifier of the document this response applies to (the CUFE/CUDE
+	// XMLDocumentKey is the identifier of the document this response applies to (the CUFE/CUDE
 	// of the validated invoice/note), not the embedded ApplicationResponse's own identifier.
-	XmlDocumentKey string
-	XmlFileName    string
+	XMLDocumentKey string
+	XMLFileName    string
 
 	// ApplicationResponseXML is the decoded XML of the ApplicationResponse DIAN issued during
 	// validation, ready to use as domain.ValidationResult.ApplicationResponseXML.
@@ -111,8 +111,8 @@ func Interpret(resp soap.DianResponse) (Result, error) {
 		StatusCode:        resp.StatusCode,
 		StatusDescription: resp.StatusDescription,
 		StatusMessage:     resp.StatusMessage,
-		XmlDocumentKey:    resp.XmlDocumentKey,
-		XmlFileName:       resp.XmlFileName,
+		XMLDocumentKey:    resp.XMLDocumentKey,
+		XMLFileName:       resp.XMLFileName,
 	}
 
 	if resp.ErrorMessage != nil {
@@ -131,15 +131,15 @@ func Interpret(resp soap.DianResponse) (Result, error) {
 }
 
 func decodeEmbeddedXML(resp soap.DianResponse) ([]byte, error) {
-	if len(resp.XmlBase64Bytes) > 0 {
-		decoded, err := base64.StdEncoding.DecodeString(string(resp.XmlBase64Bytes))
+	if len(resp.XMLBase64Bytes) > 0 {
+		decoded, err := base64.StdEncoding.DecodeString(string(resp.XMLBase64Bytes))
 		if err != nil {
 			return nil, fmt.Errorf("decode XmlBase64Bytes: %w", err)
 		}
 		return decoded, nil
 	}
-	if len(resp.XmlBytes) > 0 {
-		return resp.XmlBytes, nil
+	if len(resp.XMLBytes) > 0 {
+		return resp.XMLBytes, nil
 	}
 	return nil, nil
 }
@@ -151,7 +151,7 @@ func (r Result) ToValidationResult(lineID, documentID, documentHashType, documen
 	return domain.ValidationResult{
 		LineID:                 lineID,
 		DocumentID:             documentID,
-		DocumentCUFE:           r.XmlDocumentKey,
+		DocumentCUFE:           r.XMLDocumentKey,
 		DocumentHashType:       documentHashType,
 		DocumentIssueDate:      documentIssueDate,
 		ApplicationResponseXML: string(r.ApplicationResponseXML),

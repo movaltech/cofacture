@@ -24,8 +24,8 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 
-	"github.com/movaltech/cofacture/domain"
-	"github.com/movaltech/cofacture/internal/dianhash"
+	"github.com/movaltech/cofacture/v2/domain"
+	"github.com/movaltech/cofacture/v2/internal/dianhash"
 )
 
 // Compute calculates the CUDE of a Credit Note, a Debit Note, a Documento Equivalente

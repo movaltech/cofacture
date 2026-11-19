@@ -4,11 +4,15 @@
 package soap
 
 import (
+	"context"
+	"errors"
+	"github.com/movaltech/decimal"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 // canned simulates a complete SOAP response from the DIAN — the real client
@@ -54,7 +58,7 @@ func TestGetNumberingRange_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetNumberingRange("6382356", "6382356", "12345678-1234-1234-1234-123456789012")
+	got, err := c.GetNumberingRange(t.Context(), "6382356", "6382356", "12345678-1234-1234-1234-123456789012")
 	if err != nil {
 		t.Fatalf("GetNumberingRange: %v", err)
 	}
@@ -106,7 +110,7 @@ func TestGetNumberingRange_EmptyList(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetNumberingRange("6382356", "6382356", "any-software-id")
+	got, err := c.GetNumberingRange(t.Context(), "6382356", "6382356", "any-software-id")
 	if err != nil {
 		t.Fatalf("GetNumberingRange with empty list: %v", err)
 	}
@@ -142,7 +146,7 @@ func TestSendBillAttachmentAsync_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.SendBillAttachmentAsync("ad900123456000123456789.zip", []byte("<AttachedDocument/>"))
+	got, err := c.SendBillAttachmentAsync(t.Context(), "ad900123456000123456789.zip", []byte("<AttachedDocument/>"))
 	if err != nil {
 		t.Fatalf("SendBillAttachmentAsync: %v", err)
 	}
@@ -186,7 +190,7 @@ func TestSendEventUpdateStatus_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.SendEventUpdateStatus([]byte("<ApplicationResponse/>"))
+	got, err := c.SendEventUpdateStatus(t.Context(), []byte("<ApplicationResponse/>"))
 	if err != nil {
 		t.Fatalf("SendEventUpdateStatus: %v", err)
 	}
@@ -228,7 +232,7 @@ func TestGetStatusEvent_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetStatusEvent("some-track-id")
+	got, err := c.GetStatusEvent(t.Context(), "some-track-id")
 	if err != nil {
 		t.Fatalf("GetStatusEvent: %v", err)
 	}
@@ -267,7 +271,7 @@ func TestGetAcquirer_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetAcquirer("31", "900373076")
+	got, err := c.GetAcquirer(t.Context(), "31", "900373076")
 	if err != nil {
 		t.Fatalf("GetAcquirer: %v", err)
 	}
@@ -304,7 +308,7 @@ func TestGetAcquirer_NotFoundIsNotAnError(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetAcquirer("13", "1122334455")
+	got, err := c.GetAcquirer(t.Context(), "13", "1122334455")
 	if err != nil {
 		t.Fatalf("GetAcquirer should not fail when there is no record: %v", err)
 	}
@@ -342,7 +346,7 @@ func TestGetStatus_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetStatus("some-track-id")
+	got, err := c.GetStatus(t.Context(), "some-track-id")
 	if err != nil {
 		t.Fatalf("GetStatus: %v", err)
 	}
@@ -386,7 +390,7 @@ func TestSendNominaSync_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.SendNominaSync([]byte("<NominaIndividual/>"))
+	got, err := c.SendNominaSync(t.Context(), []byte("<NominaIndividual/>"))
 	if err != nil {
 		t.Fatalf("SendNominaSync: %v", err)
 	}
@@ -434,7 +438,7 @@ func TestGetAcquirer_HTTP404WithValidBodyIsNotAnError(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetAcquirer("13", "6382356")
+	got, err := c.GetAcquirer(t.Context(), "13", "6382356")
 	if err != nil {
 		t.Fatalf("GetAcquirer should not fail on HTTP 404 when the body is valid: %v", err)
 	}
@@ -449,7 +453,7 @@ func TestGetAcquirer_HTTP404WithValidBodyIsNotAnError(t *testing.T) {
 	}
 }
 
-const getXmlByDocumentKeyResponseXML = `<?xml version="1.0" encoding="UTF-8"?>
+const getXMLByDocumentKeyResponseXML = `<?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
   <s:Body>
     <GetXmlByDocumentKeyResponse xmlns="http://wcf.dian.colombia">
@@ -464,33 +468,33 @@ const getXmlByDocumentKeyResponseXML = `<?xml version="1.0" encoding="UTF-8"?>
   </s:Body>
 </s:Envelope>`
 
-// TestGetXmlByDocumentKey_ParsesResponse confirms GetXmlByDocumentKey sends trackId (same
+// TestGetXMLByDocumentKey_ParsesResponse confirms GetXMLByDocumentKey sends trackId (same
 // request shape as GetStatus) and parses its own <GetXmlByDocumentKeyResult> element.
-// XmlBytesBase64 arrives as the raw base64 text, not decoded — encoding/xml only copies
+// XMLBytesBase64 arrives as the raw base64 text, not decoded — encoding/xml only copies
 // character data verbatim into a []byte field, it never base64-decodes it (verified directly:
 // there is no such behavior in the standard library, despite what an earlier, incorrect
 // comment in package dian used to claim about DianResponse's equivalent field).
-func TestGetXmlByDocumentKey_ParsesResponse(t *testing.T) {
+func TestGetXMLByDocumentKey_ParsesResponse(t *testing.T) {
 	var gotBody []byte
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotBody, _ = io.ReadAll(r.Body)
 		w.Header().Set("Content-Type", "application/soap+xml; charset=utf-8")
-		_, _ = w.Write([]byte(getXmlByDocumentKeyResponseXML))
+		_, _ = w.Write([]byte(getXMLByDocumentKeyResponseXML))
 	}))
 	defer server.Close()
 
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetXmlByDocumentKey("some-track-id")
+	got, err := c.GetXMLByDocumentKey(t.Context(), "some-track-id")
 	if err != nil {
 		t.Fatalf("GetXmlByDocumentKey: %v", err)
 	}
 	if got.Code != "00" {
 		t.Errorf("Code = %q, want %q", got.Code, "00")
 	}
-	if want := "PEludm9pY2UvPg=="; string(got.XmlBytesBase64) != want {
-		t.Errorf("XmlBytesBase64 = %q, want %q (raw base64 text, not decoded)", got.XmlBytesBase64, want)
+	if want := "PEludm9pY2UvPg=="; string(got.XMLBytesBase64) != want {
+		t.Errorf("XmlBytesBase64 = %q, want %q (raw base64 text, not decoded)", got.XMLBytesBase64, want)
 	}
 	if !strings.Contains(string(gotBody), "<wcf:trackId>some-track-id</wcf:trackId>") {
 		t.Errorf("request body missing trackId: %s", gotBody)
@@ -526,7 +530,7 @@ func TestGetReferenceNotes_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetReferenceNotes("some-track-id")
+	got, err := c.GetReferenceNotes(t.Context(), "some-track-id")
 	if err != nil {
 		t.Fatalf("GetReferenceNotes: %v", err)
 	}
@@ -556,7 +560,7 @@ const getExchangeEmailsResponseXML = `<?xml version="1.0" encoding="UTF-8"?>
 // TestGetExchangeEmails_ParsesResponse confirms GetExchangeEmails sends no parameters (an empty
 // self-closing <wcf:GetExchangeEmails/> element, per the WSDL's empty request schema) and
 // parses its own <GetExchangeEmailsResult> element. CsvBase64Bytes arrives as raw base64 text —
-// see XmlBytesBase64's test for why it isn't decoded automatically.
+// see XMLBytesBase64's test for why it isn't decoded automatically.
 func TestGetExchangeEmails_ParsesResponse(t *testing.T) {
 	var gotBody []byte
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -569,7 +573,7 @@ func TestGetExchangeEmails_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetExchangeEmails()
+	got, err := c.GetExchangeEmails(t.Context())
 	if err != nil {
 		t.Fatalf("GetExchangeEmails: %v", err)
 	}
@@ -630,7 +634,7 @@ func TestGetDocumentInfo_ParsesResponse(t *testing.T) {
 	cert, key := generateTestCert(t)
 	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
 
-	got, err := c.GetDocumentInfo("18015e1f4f6b1eb55cf6d5eaa1f752bed3b0402e0cf11eb515c1ce5ccbe9bca120cd4776ee3b1e5c281e0fd2711d40d1")
+	got, err := c.GetDocumentInfo(t.Context(), "18015e1f4f6b1eb55cf6d5eaa1f752bed3b0402e0cf11eb515c1ce5ccbe9bca120cd4776ee3b1e5c281e0fd2711d40d1")
 	if err != nil {
 		t.Fatalf("GetDocumentInfo: %v", err)
 	}
@@ -647,10 +651,59 @@ func TestGetDocumentInfo_ParsesResponse(t *testing.T) {
 	if doc.Emisor.Nombre != "MI EMPRESA S.A.S." {
 		t.Errorf("Emisor.Nombre = %q, want %q", doc.Emisor.Nombre, "MI EMPRESA S.A.S.")
 	}
-	if doc.TotalEImpuestos.Total != 1500000.00 {
-		t.Errorf("TotalEImpuestos.Total = %v, want %v", doc.TotalEImpuestos.Total, 1500000.00)
+	if !doc.TotalEImpuestos.Total.Equal(decimal.MustParse("1500000.00")) {
+		t.Errorf("TotalEImpuestos.Total = %v, want %v", doc.TotalEImpuestos.Total, "1500000.00")
 	}
 	if !strings.Contains(string(gotBody), "<wcf:uuid>") {
 		t.Errorf("request body missing wcf:uuid element (GetDocumentInfo uses uuid, not trackId): %s", gotBody)
+	}
+}
+
+// TestCall_HonorsContextCancellation confirms the request is aborted as soon as the caller's
+// context ends, instead of waiting for DIAN (or HTTPClient.Timeout) to respond.
+func TestCall_HonorsContextCancellation(t *testing.T) {
+	release := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case <-release:
+		case <-r.Context().Done():
+		}
+	}))
+	defer server.Close()
+	defer close(release)
+
+	cert, key := generateTestCert(t)
+	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
+
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
+	defer cancel()
+
+	start := time.Now()
+	_, err := c.GetStatus(ctx, "some-track-id")
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("err = %v, want one wrapping context.DeadlineExceeded", err)
+	}
+	if elapsed := time.Since(start); elapsed > 5*time.Second {
+		t.Fatalf("GetStatus took %v after the context expired", elapsed)
+	}
+}
+
+// TestCall_RejectsOversizedResponse confirms the response body is read with a bound.
+func TestCall_RejectsOversizedResponse(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		chunk := make([]byte, 1<<20)
+		for i := 0; i <= maxResponseBytes>>20; i++ {
+			if _, err := w.Write(chunk); err != nil {
+				return
+			}
+		}
+	}))
+	defer server.Close()
+
+	cert, key := generateTestCert(t)
+	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
+
+	if _, err := c.GetStatus(t.Context(), "some-track-id"); err == nil || !strings.Contains(err.Error(), "exceeds") {
+		t.Fatalf("err = %v, want a response-size error", err)
 	}
 }

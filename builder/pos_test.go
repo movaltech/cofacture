@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // samplePOSInvoice reuses sampleInvoice() and overrides only the four fields the Documento

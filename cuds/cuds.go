@@ -15,7 +15,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // Compute calculates the CUDS of a Support Document (InvoiceTypeCode "05").

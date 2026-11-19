@@ -3,6 +3,8 @@
 
 package soap
 
+import "github.com/movaltech/decimal"
+
 // Types that mirror the real schemas downloaded from the certification-environment WSDL
 // (https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?xsd=xsd2, xsd3, xsd5, xsd6, xsd9,
 // xsd11-xsd21) — they are not a translation of the technical annex, they are the service's
@@ -23,20 +25,20 @@ type DianResponse struct {
 	StatusCode        string       `xml:"StatusCode"`
 	StatusDescription string       `xml:"StatusDescription"`
 	StatusMessage     string       `xml:"StatusMessage"`
-	XmlBase64Bytes    []byte       `xml:"XmlBase64Bytes"`
-	XmlBytes          []byte       `xml:"XmlBytes"`
-	XmlDocumentKey    string       `xml:"XmlDocumentKey"`
-	XmlFileName       string       `xml:"XmlFileName"`
+	XMLBase64Bytes    []byte       `xml:"XmlBase64Bytes"`
+	XMLBytes          []byte       `xml:"XmlBytes"`
+	XMLDocumentKey    string       `xml:"XmlDocumentKey"`
+	XMLFileName       string       `xml:"XmlFileName"`
 }
 
-// XMLParamsResponseTrackId is an initial ZIP validation error (it never made it into the
+// XMLParamsResponseTrackID is an initial ZIP validation error (it never made it into the
 // validation queue).
-type XMLParamsResponseTrackId struct {
+type XMLParamsResponseTrackID struct {
 	DocumentKey      string `xml:"DocumentKey"`
 	ProcessedMessage string `xml:"ProcessedMessage"`
 	SenderCode       string `xml:"SenderCode"`
 	Success          bool   `xml:"Success"`
-	XmlFileName      string `xml:"XmlFileName"`
+	XMLFileName      string `xml:"XmlFileName"`
 }
 
 // UploadDocumentResponse is the result of SendBillAsync/SendTestSetAsync/
@@ -44,7 +46,7 @@ type XMLParamsResponseTrackId struct {
 // ZipKey to query later with GetStatusZip.
 type UploadDocumentResponse struct {
 	ErrorMessageList *struct {
-		Items []XMLParamsResponseTrackId `xml:"XmlParamsResponseTrackId"`
+		Items []XMLParamsResponseTrackID `xml:"XmlParamsResponseTrackId"`
 	} `xml:"ErrorMessageList"`
 	ZipKey string `xml:"ZipKey"`
 }
@@ -87,18 +89,18 @@ type AcquirerResponse struct {
 	ReceiverEmail string `xml:"ReceiverEmail"`
 }
 
-// XMLByDocumentKeyResponse is the result of GetXmlByDocumentKey. DIAN's own WSDL names this
+// XMLByDocumentKeyResponse is the result of GetXMLByDocumentKey. DIAN's own WSDL names this
 // datacontract type "EventResponse" (http://schemas.datacontract.org/2004/07/EventResponse) —
 // a naming collision with this library's own event package that has nothing to do with it;
 // this Go type is named for what it actually holds instead of copying that name.
 type XMLByDocumentKeyResponse struct {
 	Code    string `xml:"Code"`
 	Message string `xml:"Message"`
-	// XmlBytesBase64 is the raw base64 text as DIAN sends it — encoding/xml does not decode
+	// XMLBytesBase64 is the raw base64 text as DIAN sends it — encoding/xml does not decode
 	// []byte fields from base64 (it only copies character data verbatim), so the caller must
 	// call base64.StdEncoding.DecodeString on this before it's usable XML. Same convention as
-	// DianResponse.XmlBase64Bytes.
-	XmlBytesBase64 []byte `xml:"XmlBytesBase64"`
+	// DianResponse.XMLBase64Bytes.
+	XMLBytesBase64 []byte `xml:"XmlBytesBase64"`
 	ValidationDate string `xml:"ValidationDate"`
 }
 
@@ -106,7 +108,7 @@ type XMLByDocumentKeyResponse struct {
 // configured to exchange electronic documents with DIAN's registry.
 type ExchangeEmailResponse struct {
 	// CsvBase64Bytes is the raw base64 text as DIAN sends it — see XMLByDocumentKeyResponse's
-	// doc comment on XmlBytesBase64 for why this isn't decoded automatically.
+	// doc comment on XMLBytesBase64 for why this isn't decoded automatically.
 	CsvBase64Bytes []byte `xml:"CsvBase64Bytes"`
 	Message        string `xml:"Message"`
 	StatusCode     string `xml:"StatusCode"`
@@ -131,7 +133,7 @@ type Documento struct {
 	DocumentCode        string                `xml:"DocumentCode"`
 	DocumentDescription string                `xml:"DocumentDescription"`
 	DocumentTags        []Nota                `xml:"DocumentTags>Nota"`
-	DocumentTypeId      string                `xml:"DocumentTypeId"`
+	DocumentTypeID      string                `xml:"DocumentTypeId"`
 	DocumentTypeName    string                `xml:"DocumentTypeName"`
 	Emisor              Entidad               `xml:"Emisor"`
 	Estado              []intStringPair       `xml:"Estado>KeyValueOfintstring"`
@@ -196,12 +198,13 @@ type NumeroDocumento struct {
 	Serie        string `xml:"Serie"`
 }
 
-// TotalEImpuestos is a document's IVA and total amount, as DIAN's own summary reports them —
-// a bare xs:double from the wire, not this library's int64-cents convention: there is nothing
-// to truncate here, this is DIAN's own already-formatted response, not a value we construct.
+// TotalEImpuestos is a document's IVA and total amount, as DIAN's own summary reports them.
+// The wire type is xs:double, but the text is decoded straight into a decimal.Decimal (through
+// its UnmarshalText), so the amount keeps exactly the digits DIAN sent and never goes through
+// float64.
 type TotalEImpuestos struct {
-	Iva   float64 `xml:"Iva"`
-	Total float64 `xml:"Total"`
+	Iva   decimal.Decimal `xml:"Iva"`
+	Total decimal.Decimal `xml:"Total"`
 }
 
 // ValidacionDoc is one validation entry DIAN ran against a document (or one of its events).
@@ -232,7 +235,7 @@ type Evento struct {
 // corrects), as summarized by GetDocumentInfo/Evento.
 type ReferenciaDocumento struct {
 	Descripcion      string  `xml:"Descripcion"`
-	DocumentTypeId   string  `xml:"DocumentTypeId"`
+	DocumentTypeID   string  `xml:"DocumentTypeId"`
 	DocumentTypeName string  `xml:"DocumentTypeName"`
 	Emisor           Entidad `xml:"Emisor"`
 	Fecha            string  `xml:"Fecha"`

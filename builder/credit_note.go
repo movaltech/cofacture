@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/beevik/etree"
-	"github.com/movaltech/cofacture/domain"
-	ubl "github.com/movaltech/cofacture/xml"
+	"github.com/movaltech/cofacture/v2/domain"
+	ubl "github.com/movaltech/cofacture/v2/xml"
 )
 
 // BuildCreditNote builds the XML tree of a Credit Note. Reuses the same infrastructure as

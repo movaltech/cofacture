@@ -7,9 +7,9 @@ import (
 	"errors"
 
 	"github.com/beevik/etree"
-	"github.com/movaltech/cofacture/domain"
-	"github.com/movaltech/cofacture/event"
-	ubl "github.com/movaltech/cofacture/xml"
+	"github.com/movaltech/cofacture/v2/domain"
+	"github.com/movaltech/cofacture/v2/event"
+	ubl "github.com/movaltech/cofacture/v2/xml"
 )
 
 // NOTE ON VERIFICATION: unlike the rest of this package, the structure below was assembled

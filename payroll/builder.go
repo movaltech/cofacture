@@ -8,8 +8,9 @@ import (
 	"strconv"
 
 	"github.com/beevik/etree"
-	"github.com/movaltech/cofacture/domain"
-	ubl "github.com/movaltech/cofacture/xml"
+	"github.com/movaltech/cofacture/v2/domain"
+	ubl "github.com/movaltech/cofacture/v2/xml"
+	"github.com/movaltech/decimal"
 )
 
 const (
@@ -224,7 +225,7 @@ func Build(n Nomina, cune, softwareSC, codigoQR string) (*etree.Document, error)
 	return doc, nil
 }
 
-func pct(v float64) string { return fmt.Sprintf("%.2f", v) }
+func pct(v decimal.Decimal) string { return domain.FormatFixed(v, 2) }
 func boolStr(b bool) string {
 	if b {
 		return "true"

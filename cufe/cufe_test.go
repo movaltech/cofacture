@@ -6,7 +6,7 @@ package cufe
 import (
 	"testing"
 
-	"github.com/movaltech/cofacture/domain"
+	"github.com/movaltech/cofacture/v2/domain"
 )
 
 // TestCompute_AnexoTecnicoExample uses the official example from section 11.2.1 of the

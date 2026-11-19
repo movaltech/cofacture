@@ -5,6 +5,7 @@ package soap
 
 import (
 	"bytes"
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/xml"
@@ -22,6 +23,9 @@ const (
 	HabilitacionURL = "https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc"
 	ProduccionURL   = "https://vpfe.dian.gov.co/WcfDianCustomerServices.svc"
 )
+
+// maxResponseBytes caps how much of a response body call will read.
+const maxResponseBytes = 64 << 20
 
 // Client is the SOAP client for DIAN's receiving web services. It does not require mutual TLS
 // (the WSDL's real policy has RequireClientCertificate="false") — Cert/Key are used only to
@@ -66,7 +70,11 @@ type soapFaultXML struct {
 // content of soap:Body, already verified not to be a Fault) in out via xml.Unmarshal.
 // out must be a pointer to a struct with the xml tag matching the "{action}Response" element
 // expected inside soap:Body.
-func (c *Client) call(action string, bodyBuilder func(body *etree.Element), out any) error {
+//
+// ctx bounds the whole HTTP exchange: if it is canceled or its deadline passes, the request is
+// aborted and call returns an error that wraps ctx.Err(). HTTPClient.Timeout still applies on
+// top of it.
+func (c *Client) call(ctx context.Context, action string, bodyBuilder func(body *etree.Element), out any) error {
 	doc, err := c.buildEnvelope(action, bodyBuilder)
 	if err != nil {
 		return err
@@ -76,7 +84,7 @@ func (c *Client) call(action string, bodyBuilder func(body *etree.Element), out 
 		return fmt.Errorf("soap: serialize request: %w", err)
 	}
 
-	httpReq, err := http.NewRequest(http.MethodPost, c.BaseURL, bytes.NewReader(reqXML))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, bytes.NewReader(reqXML))
 	if err != nil {
 		return fmt.Errorf("soap: build HTTP request: %w", err)
 	}
@@ -86,11 +94,16 @@ func (c *Client) call(action string, bodyBuilder func(body *etree.Element), out 
 	if err != nil {
 		return fmt.Errorf("soap: send request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
-	respBody, err := io.ReadAll(resp.Body)
+	// Bounded read: a misbehaving server (or a proxy in between) cannot make the client buffer
+	// an unbounded body. The limit is far above any real DIAN response.
+	respBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
 	if err != nil {
 		return fmt.Errorf("soap: read response: %w", err)
+	}
+	if len(respBody) > maxResponseBytes {
+		return fmt.Errorf("soap: response body exceeds %d bytes", maxResponseBytes)
 	}
 
 	var envelope struct {

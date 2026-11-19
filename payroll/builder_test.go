@@ -3,7 +3,12 @@
 
 package payroll
 
-import "testing"
+import (
+	"strings"
+	"testing"
+
+	"github.com/movaltech/decimal"
+)
 
 // validNomina returns a minimal but complete Nomina for a normal ("102") payroll — enough to
 // get through Build() without hitting an unrelated validation error, so each test below only
@@ -133,5 +138,35 @@ func TestBuild_Adjustment_SetsNovedadTrue(t *testing.T) {
 	}
 	if got := novedad.SelectAttrValue("CUNENov", "MISSING"); got != originalCUNE {
 		t.Errorf("CUNENov = %q, want %q", got, originalCUNE)
+	}
+}
+
+// TestBuild_DeductionPercentages confirms deduction percentages are rendered exactly with 2
+// decimals from decimal.Decimal values.
+func TestBuild_DeductionPercentages(t *testing.T) {
+	n := validNomina()
+	n.Deducciones.Salud = &DeduccionPct{Porcentaje: decimal.MustParse("4"), DeduccionCents: 5_200_000}
+	n.Deducciones.FondoSP = &FondoSP{
+		Porcentaje: decimal.MustParse("0.5"), DeduccionSPCents: 650_000,
+		PorcentajeSub: decimal.MustParse("0.5"), DeduccionSubCents: 650_000,
+	}
+
+	doc, err := Build(n, "cune-placeholder", "sc-placeholder", "https://example.test/qr")
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+	checks := map[string]string{
+		"//Deducciones/Salud/@Porcentaje":      "4.00",
+		"//Deducciones/FondoSP/@Porcentaje":    "0.50",
+		"//Deducciones/FondoSP/@PorcentajeSub": "0.50",
+	}
+	for path, want := range checks {
+		el := doc.FindElement(path[:strings.LastIndex(path, "/@")])
+		if el == nil {
+			t.Fatalf("%s: element not found", path)
+		}
+		if got := el.SelectAttrValue(path[strings.LastIndex(path, "@")+1:], ""); got != want {
+			t.Errorf("%s = %q, want %q", path, got, want)
+		}
 	}
 }
