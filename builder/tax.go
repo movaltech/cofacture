@@ -8,11 +8,12 @@ import (
 	"github.com/movaltech/cofacture/v2/domain"
 )
 
-// appendWithholdingTaxTotal adds a cac:WithholdingTaxTotal for each withholding on the Support
-// Document (InvoiceTypeCode "05"). Unlike cac:TaxTotal, where every subtype goes under the
-// same element, each withholding generates its own cac:WithholdingTaxTotal with exactly one
-// cac:TaxSubtotal.
-func appendWithholdingTaxTotal(parent *etree.Element, taxes []domain.Tax, currency string) {
+// appendWithholdingTaxTotal adds a cac:WithholdingTaxTotal for each withholding. Unlike
+// cac:TaxTotal, where every subtype goes under the same element, each withholding generates
+// its own cac:WithholdingTaxTotal with exactly one cac:TaxSubtotal. exemptionReason adds
+// cbc:TaxExemptionReason "01", which the Support Document and its Adjustment Note carry; the
+// Invoice and its notes do not have that element.
+func appendWithholdingTaxTotal(parent *etree.Element, taxes []domain.Tax, currency string, exemptionReason bool) {
 	for _, t := range taxes {
 		wtt := parent.CreateElement("cac:WithholdingTaxTotal")
 
@@ -32,7 +33,9 @@ func appendWithholdingTaxTotal(parent *etree.Element, taxes []domain.Tax, curren
 
 		category := sub.CreateElement("cac:TaxCategory")
 		category.CreateElement("cbc:Percent").SetText(formatPercent(t.Percent))
-		category.CreateElement("cbc:TaxExemptionReason").SetText("01")
+		if exemptionReason {
+			category.CreateElement("cbc:TaxExemptionReason").SetText("01")
+		}
 		scheme := category.CreateElement("cac:TaxScheme")
 		scheme.CreateElement("cbc:ID").SetText(t.TypeCode)
 		scheme.CreateElement("cbc:Name").SetText(t.TypeName)

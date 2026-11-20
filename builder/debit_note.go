@@ -66,6 +66,10 @@ func BuildDebitNote(dn domain.DebitNote) (*etree.Document, error) {
 	appendAccountingParty(root, "AccountingSupplierParty", dn.Supplier, true, dn.Prefix, true)
 	appendAccountingParty(root, "AccountingCustomerParty", dn.Customer, false, "", true)
 
+	// In the UBL 2.1 DebitNote schema AllowanceCharge comes before PaymentMeans, unlike
+	// Invoice and CreditNote (DIAN rejected the other order with ZB01). The schema has no
+	// WithholdingTaxTotal.
+	appendAllowanceCharges(root, dn.AllowanceCharges, dn.CurrencyCode)
 	for _, pm := range dn.PaymentMeans {
 		appendPaymentMean(root, pm)
 	}
