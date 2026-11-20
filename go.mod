@@ -16,3 +16,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 )
+
+// v2.2.0 was tagged on the 2.1.0 commit by mistake and lacks its changes; use v2.2.1.
+retract v2.2.0
