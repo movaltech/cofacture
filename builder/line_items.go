@@ -63,7 +63,18 @@ func appendDocumentLine(parent *etree.Element, node, nodeQty string, index int, 
 		ip.CreateElement("cbc:Description").SetText("Por operación")
 	}
 
+	// InvoiceLine has AllowanceCharge before TaxTotal; CreditNoteLine and DebitNoteLine have it
+	// after (UBL 2.1 schemas; DIAN rejected the other order with ZB01). The Support Document
+	// and its Adjustment Note carry none.
+	isNote := documentTypeCode == "91" || documentTypeCode == "92"
+	withAllowances := documentTypeCode != "05" && documentTypeCode != "95"
+	if withAllowances && !isNote {
+		appendAllowanceCharges(el, line.AllowanceCharges, currency)
+	}
 	appendTaxTotal(el, line.Taxes, currency)
+	if withAllowances && isNote {
+		appendAllowanceCharges(el, line.AllowanceCharges, currency)
+	}
 
 	item := el.CreateElement("cac:Item")
 	item.CreateElement("cbc:Description").SetText(line.Description)

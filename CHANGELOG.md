@@ -5,6 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] — 2026-11-19
+
+### Added
+
+- Discounts and charges (`cac:AllowanceCharge`): `domain.AllowanceCharge` on a `Line` (it
+  changes the line's taxable base, rule FAV06) and on the `Document` (it changes no base, rule
+  FAQ01), with `Totals.AllowanceTotalCents` and `Totals.ChargeTotalCents`
+  (`cbc:AllowanceTotalAmount`, `cbc:ChargeTotalAmount`). The Invoice, Credit Note and Debit Note
+  builders render them where each schema puts them, which differs: on the Debit Note the
+  document-level group goes before `cac:PaymentMeans`, and in Credit and Debit Note lines it
+  goes after `cac:TaxTotal`. IDs are numbered from 1 (rule FAQ02).
+- Advance payments: `domain.PrepaidPayment` and `Document.PrepaidPayments` render
+  `cac:PrepaidPayment` (group FBD01) on the Invoice; their sum is still `Totals.PrepaidCents`.
+- `Document.WithholdingTaxes` is rendered on the Invoice too (`cac:WithholdingTaxTotal`), where
+  rule FAT01 limits it to the self-withholdings (autorretenciones) the issuer practices. It
+  changes no total and carries no `cbc:TaxExemptionReason`, which only the Support Document and
+  its Adjustment Note have. Credit and Debit Notes ignore it: their schemas have no such group.
+
+Verified in DIAN habilitacion: invoices, credit notes and debit notes with line and document
+discounts and charges, ReteFuente, ReteIVA and an advance payment were accepted without
+notices. DIAN answers notice FAT07 for any ReteICA (07) withholding, which its table 13.3.11
+gives no rates for. Documents that use none of these fields build exactly as in 2.1.0.
+
 ## [2.1.0] — 2026-11-19
 
 ### Added

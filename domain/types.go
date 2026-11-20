@@ -79,6 +79,31 @@ type ReferencePrice struct {
 	TypeCode         string
 }
 
+// AllowanceCharge is a discount (ChargeIndicator false) or a charge (true), cac:AllowanceCharge.
+// On a Line it changes the line's taxable base: the caller subtracts discounts from and adds
+// charges to Line.LineExtensionCents (rule FAV06). On the Document it does not touch any tax
+// base (rule FAQ01) and only moves PayableCents (rule FAU14).
+type AllowanceCharge struct {
+	ChargeIndicator bool
+	// ReasonCode is table 13.3.8: "00"/"01" discounts, "02"/"03" charges. DIAN requires it
+	// for a document-level discount (rule FAQ04).
+	ReasonCode      string
+	Reason          string          // free text, e.g. "Descuento por pronto pago"
+	Percent         decimal.Decimal // cbc:MultiplierFactorNumeric, 0-100, rendered with 2 decimals
+	AmountCents     int64
+	BaseAmountCents int64
+}
+
+// PrepaidPayment is an advance payment received before the invoice (cac:PrepaidPayment, group
+// FBD01). Its total goes to Totals.PrepaidCents; DIAN does not subtract it from PayableCents
+// (rule FAU14).
+type PrepaidPayment struct {
+	ID              string
+	PaidAmountCents int64
+	ReceivedDate    string // YYYY-MM-DD
+	PaidDate        string // YYYY-MM-DD, optional
+}
+
 // Line is a detail line (InvoiceLine / CreditNoteLine / DebitNoteLine).
 type Line struct {
 	Description        string
@@ -92,7 +117,10 @@ type Line struct {
 	ItemTypeCode       string // product coding standard catalog (e.g. "999")
 	ItemTypeName       string
 	ItemTypeAgencyID   string
-	Taxes              []Tax
+	// AllowanceCharges are the line's discounts and charges, already reflected in
+	// LineExtensionCents. Ignored by the Support Document and its Adjustment Note.
+	AllowanceCharges []AllowanceCharge
+	Taxes            []Tax
 }
 
 // PaymentMean is a payment method (PaymentMeans).
@@ -112,7 +140,11 @@ type Totals struct {
 	LineExtensionCents int64
 	TaxExclusiveCents  int64
 	TaxInclusiveCents  int64
-	PrepaidCents       int64 // only serialized when > 0 and the document is an Invoice
+	// AllowanceTotalCents and ChargeTotalCents are the sums of the document-level discounts
+	// and charges (rules FAU08 and FAU10). Only serialized when > 0.
+	AllowanceTotalCents int64
+	ChargeTotalCents    int64
+	PrepaidCents        int64 // only serialized when > 0 and the document is an Invoice
 
 	// RoundingCents is cbc:PayableRoundingAmount — the only monetary field the Technical Annex
 	// allows to be negative (e.g. rounding a POS total to the nearest 50/100 pesos). Only

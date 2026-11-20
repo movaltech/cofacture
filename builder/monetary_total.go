@@ -26,6 +26,17 @@ func appendMonetaryTotal(parent *etree.Element, node string, t domain.Totals, cu
 	taxIncl.CreateAttr("currencyID", currency)
 	taxIncl.SetText(formatAmount(t.TaxInclusiveCents))
 
+	if t.AllowanceTotalCents > 0 {
+		allowance := el.CreateElement("cbc:AllowanceTotalAmount")
+		allowance.CreateAttr("currencyID", currency)
+		allowance.SetText(formatAmount(t.AllowanceTotalCents))
+	}
+	if t.ChargeTotalCents > 0 {
+		charge := el.CreateElement("cbc:ChargeTotalAmount")
+		charge.CreateAttr("currencyID", currency)
+		charge.SetText(formatAmount(t.ChargeTotalCents))
+	}
+
 	if documentTypeCode == "01" && t.PrepaidCents > 0 {
 		prepaid := el.CreateElement("cbc:PrepaidAmount")
 		prepaid.CreateAttr("currencyID", currency)

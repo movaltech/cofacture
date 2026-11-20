@@ -91,7 +91,7 @@ func BuildSupportDocument(inv domain.Document) (*etree.Document, error) {
 	}
 
 	appendTaxTotal(root, inv.HeaderTaxes, inv.CurrencyCode)
-	appendWithholdingTaxTotal(root, inv.WithholdingTaxes, inv.CurrencyCode)
+	appendWithholdingTaxTotal(root, inv.WithholdingTaxes, inv.CurrencyCode, true)
 	appendMonetaryTotal(root, "LegalMonetaryTotal", inv.Totals, inv.CurrencyCode, inv.DocumentTypeCode)
 
 	// Per-line period date: the document's PeriodStartDate if specified, otherwise IssueDate.

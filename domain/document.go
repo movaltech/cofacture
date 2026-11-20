@@ -50,11 +50,22 @@ type Document struct {
 	// the builder package.
 	HeaderTaxes []Tax
 
-	// WithholdingTaxes are withholdings (WithholdingTaxTotal) — exclusive to the Support
-	// Document (InvoiceTypeCode "05"). Each element generates an independent
-	// cac:WithholdingTaxTotal (one per type: ReteIVA="05", ReteRenta="06"). Ignored for
-	// Invoice/CreditNote/DebitNote.
+	// WithholdingTaxes are withholdings (WithholdingTaxTotal), one per type (ReteIVA "05",
+	// ReteFuente "06", ReteICA "07"). Each element generates an independent
+	// cac:WithholdingTaxTotal. On the Support Document they are part of the document; on an
+	// Invoice they are the issuer's self-withholdings (autorretenciones, rule FAT01),
+	// informative, and change no total. CreditNote and DebitNote ignore them: their UBL 2.1
+	// schemas have no WithholdingTaxTotal. DIAN checks TaxAmount against TaxableAmount
+	// x Percent with the rate at 2 decimals (notice FAT07 otherwise).
 	WithholdingTaxes []Tax
+
+	// AllowanceCharges are document-level discounts and charges, which do not change any tax
+	// base; their sums go to Totals.AllowanceTotalCents and Totals.ChargeTotalCents.
+	AllowanceCharges []AllowanceCharge
+
+	// PrepaidPayments are advance payments (Invoice only); their sum goes to
+	// Totals.PrepaidCents.
+	PrepaidPayments []PrepaidPayment
 
 	Totals Totals
 	Lines  []Line

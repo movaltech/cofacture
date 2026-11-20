@@ -77,7 +77,10 @@ func BuildInvoice(inv domain.Document) (*etree.Document, error) {
 		appendPaymentMean(root, pm)
 	}
 
+	appendPrepaidPayments(root, inv.PrepaidPayments, inv.CurrencyCode)
+	appendAllowanceCharges(root, inv.AllowanceCharges, inv.CurrencyCode)
 	appendTaxTotal(root, inv.HeaderTaxes, inv.CurrencyCode)
+	appendWithholdingTaxTotal(root, inv.WithholdingTaxes, inv.CurrencyCode, false)
 	appendMonetaryTotal(root, "LegalMonetaryTotal", inv.Totals, inv.CurrencyCode, inv.DocumentTypeCode)
 
 	for i, line := range inv.Lines {
