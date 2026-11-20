@@ -68,8 +68,10 @@ type NumberRangeResponse struct {
 
 // NumberRangeResponseList is the full result of GetNumberingRange — a list of ranges
 // authorized for the given issuer + software pair (namespace
-// http://schemas.datacontract.org/2004/07/NumberRangeResponseList). OperationCode "0" means
-// success; any other code indicates a DIAN-side error.
+// http://schemas.datacontract.org/2004/07/NumberRangeResponseList). OperationCode "0" or
+// "100" means success: DIAN habilitacion answers "100" ("Accion completada OK.") with the
+// list of ranges. Any other code indicates a DIAN-side error. In habilitacion the list may
+// hold only the support document range (prefix SEDS), which carries no TechnicalKey.
 type NumberRangeResponseList struct {
 	OperationCode        string                `xml:"OperationCode"`
 	OperationDescription string                `xml:"OperationDescription"`
