@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.2.2] — 2026-11-19
+
+### Fixed
+
+- `cac:TaxTotal` is one per tax type, with the sum of that type's subtotals, at header and
+  line level. Before, every tax went under a single `TaxTotal`, which DIAN rejects with FAS01b
+  and FAS02 when a document mixes tax types, e.g. IVA and INC; documents with a single tax
+  type, such as IVA at several rates, build as before.
+- `soap.NumberRangeResponseList` documents that DIAN answers `OperationCode` "100" ("Accion
+  completada OK.") on success, besides "0", as habilitacion does, and that a support document
+  range (prefix SEDS) comes without a technical key.
+
 ## [2.2.1] — 2026-11-19
 
 ### Fixed

@@ -44,11 +44,26 @@ func appendWithholdingTaxTotal(parent *etree.Element, taxes []domain.Tax, curren
 
 // appendTaxTotal adds cac:TaxTotal (header or line level). Adds nothing if taxes is empty,
 // matching the technical annex's requirement that TaxTotal is optional when no tax applies.
+//
+// Each tax type gets its own cac:TaxTotal, whose TaxAmount is the sum of that type's
+// subtotals (rules FAS01b and FAS02): an Invoice with IVA and INC carries two TaxTotal. Types
+// keep the order of their first appearance in taxes.
 func appendTaxTotal(parent *etree.Element, taxes []domain.Tax, currency string) {
-	if len(taxes) == 0 {
-		return
+	var order []string
+	byType := map[string][]domain.Tax{}
+	for _, t := range taxes {
+		if _, ok := byType[t.TypeCode]; !ok {
+			order = append(order, t.TypeCode)
+		}
+		byType[t.TypeCode] = append(byType[t.TypeCode], t)
 	}
+	for _, typ := range order {
+		appendTaxTotalOfType(parent, byType[typ], currency)
+	}
+}
 
+// appendTaxTotalOfType adds one cac:TaxTotal with the subtotals of a single tax type.
+func appendTaxTotalOfType(parent *etree.Element, taxes []domain.Tax, currency string) {
 	var totalCents int64
 	for _, t := range taxes {
 		totalCents += t.TaxAmountCents
