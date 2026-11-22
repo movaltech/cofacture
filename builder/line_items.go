@@ -78,6 +78,14 @@ func appendDocumentLine(parent *etree.Element, node, nodeQty string, index int, 
 
 	item := el.CreateElement("cac:Item")
 	item.CreateElement("cbc:Description").SetText(line.Description)
+	// UBL 2.1 places BrandName and ModelName right after Description and before every item
+	// identification.
+	if line.BrandName != "" {
+		item.CreateElement("cbc:BrandName").SetText(line.BrandName)
+	}
+	if line.ModelName != "" {
+		item.CreateElement("cbc:ModelName").SetText(line.ModelName)
+	}
 	if documentTypeCodesUsingMandante[documentTypeCode] {
 		agentID := item.CreateElement("cac:InformationContentProviderParty").
 			CreateElement("cac:PowerOfAttorney").

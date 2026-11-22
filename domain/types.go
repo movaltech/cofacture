@@ -117,6 +117,12 @@ type Line struct {
 	ItemTypeCode       string // product coding standard catalog (e.g. "999")
 	ItemTypeName       string
 	ItemTypeAgencyID   string
+	// BrandName and ModelName are the item's brand and model (cac:Item/cbc:BrandName and
+	// cbc:ModelName), both optional. DIAN notifies their absence (FAZ04/FAZ05 on invoices,
+	// NSAZ04/NSAZ05 on adjustment notes) but never rejects it: leave them empty when the item
+	// has none, such as a service.
+	BrandName string
+	ModelName string
 	// AllowanceCharges are the line's discounts and charges, already reflected in
 	// LineExtensionCents. Ignored by the Support Document and its Adjustment Note.
 	AllowanceCharges []AllowanceCharge
