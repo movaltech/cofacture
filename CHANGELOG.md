@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] — 2026-11-22
+
+### Added
+
+- `qr.InvoiceText` and `qr.NoteText`: the text of the QR printed on the graphic
+  representation of an invoice and of a credit or debit note, as defined in section 11.7 of
+  the invoicing annex 1.9: `NumFac`, `FecFac`, `HorFac`, `NitFac`, `DocAdq`, `ValFac`, `ValIva`,
+  `ValOtroIm`, `ValTolFac`, `CUFE` (`CUDE` on the notes) and `QRCode`. `ValIva` is the IVA
+  (tax 01), `ValOtroIm` every other tax; withholdings stay out. As with every document,
+  `sts:QRCode` keeps the plain URL (`qr.URL`).
+
 ## [2.4.0] — 2026-11-22
 
 ### Added

@@ -68,32 +68,88 @@ func AdjustmentNoteText(doc domain.Document, cuds string) string {
 	return text(doc, cuds, "NAS")
 }
 
+// InvoiceText builds the text of the QR printed on an invoice's graphic representation, as
+// defined in section 11.7 of the invoicing annex (version 1.9):
+//
+//	NumFac: <cbc:ID>
+//	FecFac: <cbc:IssueDate>
+//	HorFac: <cbc:IssueTime>
+//	NitFac: <issuer's identification, without check digit>
+//	DocAdq: <acquirer's identification, without check digit>
+//	ValFac: <LineExtensionAmount>
+//	ValIva: <VAT amount (tax 01)>
+//	ValOtroIm: <sum of the other taxes>
+//	ValTolFac: <PayableAmount>
+//	CUFE: <cufe>
+//	QRCode: <search URL>
+//
+// Withholdings are not taxes of the document and stay out. As for every document, sts:QRCode
+// takes the plain URL, not this text.
+func InvoiceText(doc domain.Document, cufe string) string {
+	return invoiceText(doc, "CUFE", cufe)
+}
+
+// NoteText builds the printed QR text of a credit or debit note: the fields of InvoiceText
+// (the annex uses the same names for every document of section 11.7), with the note's CUDE.
+func NoteText(doc domain.Document, cude string) string {
+	return invoiceText(doc, "CUDE", cude)
+}
+
+func invoiceText(doc domain.Document, keyName, key string) string {
+	vat, others := taxes(doc)
+	return block(doc.EnvironmentCode, key, [][2]string{
+		{"NumFac", doc.Prefix + doc.Number},
+		{"FecFac", doc.IssueDate},
+		{"HorFac", doc.IssueTime},
+		{"NitFac", doc.Supplier.Identification.Number},
+		{"DocAdq", doc.Customer.Identification.Number},
+		{"ValFac", domain.FormatCents(doc.Totals.LineExtensionCents)},
+		{"ValIva", domain.FormatCents(vat)},
+		{"ValOtroIm", domain.FormatCents(others)},
+		{"ValTolFac", domain.FormatCents(doc.Totals.PayableCents)},
+		{keyName, key},
+	})
+}
+
 // text writes the printed QR block of annex 12.2; suffix names the document (DS or NAS).
 func text(doc domain.Document, cuds, suffix string) string {
-	var vat int64
+	vat, _ := taxes(doc)
+	return block(doc.EnvironmentCode, cuds, [][2]string{
+		{"Num" + suffix, doc.Prefix + doc.Number},
+		{"Fec" + suffix, doc.IssueDate},
+		{"Hor" + suffix, doc.IssueTime},
+		{"NumSNO", doc.Supplier.Identification.Number},
+		{"DocAdq", doc.Customer.Identification.Number},
+		{"Val" + suffix, domain.FormatCents(doc.Totals.LineExtensionCents)},
+		{"ValIva", domain.FormatCents(vat)},
+		{"ValTol" + suffix, domain.FormatCents(doc.Totals.PayableCents)},
+		{"CUDS", cuds},
+	})
+}
+
+// taxes splits the header taxes into IVA (tax 01) and every other tax.
+func taxes(doc domain.Document) (vat, others int64) {
 	for _, t := range doc.HeaderTaxes {
 		if t.TypeCode == "01" {
 			vat += t.TaxAmountCents
+		} else {
+			others += t.TaxAmountCents
 		}
 	}
+	return vat, others
+}
+
+// block writes "Key: value" lines and ends with the QRCode line and the search URL.
+func block(environmentCode, key string, fields [][2]string) string {
 	var b strings.Builder
-	line := func(key, value string) {
-		b.WriteString(key)
+	for _, f := range fields {
+		b.WriteString(f[0])
 		b.WriteString(": ")
-		b.WriteString(value)
+		b.WriteString(f[1])
 		b.WriteByte('\n')
 	}
-	line("Num"+suffix, doc.Prefix+doc.Number)
-	line("Fec"+suffix, doc.IssueDate)
-	line("Hor"+suffix, doc.IssueTime)
-	line("NumSNO", doc.Supplier.Identification.Number)
-	line("DocAdq", doc.Customer.Identification.Number)
-	line("Val"+suffix, domain.FormatCents(doc.Totals.LineExtensionCents))
-	line("ValIva", domain.FormatCents(vat))
-	line("ValTol"+suffix, domain.FormatCents(doc.Totals.PayableCents))
-	line("CUDS", cuds)
 	b.WriteString("QRCode: ")
-	b.WriteString(URL(doc.EnvironmentCode, cuds))
+	b.WriteString(URL(environmentCode, key))
 	return b.String()
 }
 
