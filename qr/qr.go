@@ -1,13 +1,13 @@
 // Copyright (c) 2026 Diego Montoya
 // SPDX-License-Identifier: AGPL-3.0
 
-// Package qr builds the QR code URL required in the graphic representation of DIAN electronic
-// documents (Technical Annex 1.9, section 11.7.1).
+// Package qr builds what DIAN asks for in a document's QR code: the plain search URL that goes
+// in sts:QRCode and, for the documents whose annex defines one, the text block of the QR printed
+// on the graphic representation.
 package qr
 
 import (
-	"fmt"
-	"strconv"
+	"strings"
 
 	"github.com/movaltech/cofacture/v2/domain"
 )
@@ -36,104 +36,81 @@ func SupportDocumentURL(environmentCode, cuds string) string {
 	return URL(environmentCode, cuds)
 }
 
-// AdjustmentNoteContent builds the full QR content for the Adjustment Note to the Support
-// Document (InvoiceTypeCode "95"). Follows the same pattern as SupportDocumentContent (a
-// multi-line text block followed by the URL), adapted for the Adjustment Note document type.
-func AdjustmentNoteContent(inv domain.Document, cuds, softwarePIN string) string {
-	var codImp, valImp string
-	for _, t := range inv.HeaderTaxes {
-		if t.TypeCode == "01" {
-			codImp = t.TypeCode
-			valImp = domain.FormatCents(t.TaxAmountCents)
-			break
-		}
-	}
-	if codImp == "" && len(inv.HeaderTaxes) > 0 {
-		codImp = inv.HeaderTaxes[0].TypeCode
-		valImp = domain.FormatCents(inv.HeaderTaxes[0].TaxAmountCents)
-	}
-	if codImp == "" {
-		codImp = "01"
-		valImp = "0.00"
-	}
-
-	url := URL(inv.EnvironmentCode, cuds)
-
-	ambLabel := strconv.Itoa(func() int {
-		if inv.EnvironmentCode == "2" {
-			return 2
-		}
-		return 1
-	}())
-
-	return fmt.Sprintf(
-		"N°NotaAjuste=%s\nFecha=%s\nHora=%s\nValNA=%s\nCodImp=%s\nValImp=%s\nValTot=%s\nNumSNO=%s\nNITABS=%s\nPIN:%s\nAmb:%s\nCUDS=%s\nURL=%s",
-		inv.Prefix+inv.Number,
-		inv.IssueDate,
-		inv.IssueTime,
-		domain.FormatCents(inv.Totals.LineExtensionCents),
-		codImp,
-		valImp,
-		domain.FormatCents(inv.Totals.PayableCents),
-		inv.Supplier.Identification.Number,
-		inv.Customer.Identification.Number,
-		softwarePIN,
-		ambLabel,
-		cuds,
-		url,
-	)
+// SupportDocumentText builds the text of the QR printed on a support document's graphic
+// representation (InvoiceTypeCode "05"), as defined in section 12.2.1 of the support document
+// annex (Resolution 000167 of 2021):
+//
+//	NumDS: <cbc:ID>
+//	FecDS: <cbc:IssueDate>
+//	HorDS: <cbc:IssueTime>
+//	NumSNO: <seller's identification, without check digit>
+//	DocAdq: <acquirer's identification, without check digit>
+//	ValDS: <LineExtensionAmount>
+//	ValIva: <VAT amount (tax 01)>
+//	ValTolDS: <PayableAmount>
+//	CUDS: <cuds>
+//	QRCode: <search URL>
+//
+// Roles are those of the support document: Supplier is the seller not obliged to invoice
+// (SNO), Customer is the acquirer issuing the document. The annex's own example names the
+// acquirer NITABS; this follows the field definition, DocAdq. The text never carries the
+// software PIN, and it is not what goes in sts:QRCode: that is SupportDocumentURL.
+func SupportDocumentText(doc domain.Document, cuds string) string {
+	return text(doc, cuds, "DS")
 }
 
-// SupportDocumentContent builds the full QR content for the Support Document (InvoiceTypeCode
-// "05"). Unlike Invoice/CreditNote/DebitNote, whose QR is just a URL, the Support Document
-// requires a multi-line text block followed by the URL (Technical Annex 1.9, section 11.7.1).
+// AdjustmentNoteText builds the text of the QR printed on the graphic representation of an
+// adjustment note to a support document (CreditNote, type "95"), as defined in section 12.2.2
+// of the support document annex: the same fields as SupportDocumentText, named NumNAS, FecNAS,
+// HorNAS, ValNAS and ValTolNAS. As there, it never carries the software PIN, and sts:QRCode
+// takes the plain URL.
+func AdjustmentNoteText(doc domain.Document, cuds string) string {
+	return text(doc, cuds, "NAS")
+}
+
+// text writes the printed QR block of annex 12.2; suffix names the document (DS or NAS).
+func text(doc domain.Document, cuds, suffix string) string {
+	var vat int64
+	for _, t := range doc.HeaderTaxes {
+		if t.TypeCode == "01" {
+			vat += t.TaxAmountCents
+		}
+	}
+	var b strings.Builder
+	line := func(key, value string) {
+		b.WriteString(key)
+		b.WriteString(": ")
+		b.WriteString(value)
+		b.WriteByte('\n')
+	}
+	line("Num"+suffix, doc.Prefix+doc.Number)
+	line("Fec"+suffix, doc.IssueDate)
+	line("Hor"+suffix, doc.IssueTime)
+	line("NumSNO", doc.Supplier.Identification.Number)
+	line("DocAdq", doc.Customer.Identification.Number)
+	line("Val"+suffix, domain.FormatCents(doc.Totals.LineExtensionCents))
+	line("ValIva", domain.FormatCents(vat))
+	line("ValTol"+suffix, domain.FormatCents(doc.Totals.PayableCents))
+	line("CUDS", cuds)
+	b.WriteString("QRCode: ")
+	b.WriteString(URL(doc.EnvironmentCode, cuds))
+	return b.String()
+}
+
+// SupportDocumentContent returns SupportDocumentText; softwarePIN is ignored.
 //
-// softwarePIN is the authorized software PIN — the same one used to compute the CUDS.
-// cuds is the already-computed CUDS (hex SHA-384).
-//
-// Roles in the Support Document: Supplier = non-obligated third party (NumSNO), Customer =
-// issuing company (NITABS).
+// Deprecated: it used to put the software PIN, which is secret, in the QR text, and its field
+// names did not follow the annex. Use SupportDocumentText for the printed QR and
+// SupportDocumentURL for sts:QRCode.
 func SupportDocumentContent(inv domain.Document, cuds, softwarePIN string) string {
-	var codImp, valImp string
-	for _, t := range inv.HeaderTaxes {
-		if t.TypeCode == "01" { // VAT
-			codImp = t.TypeCode
-			valImp = domain.FormatCents(t.TaxAmountCents)
-			break
-		}
-	}
-	if codImp == "" && len(inv.HeaderTaxes) > 0 {
-		codImp = inv.HeaderTaxes[0].TypeCode
-		valImp = domain.FormatCents(inv.HeaderTaxes[0].TaxAmountCents)
-	}
-	if codImp == "" {
-		codImp = "01"
-		valImp = "0.00"
-	}
+	return SupportDocumentText(inv, cuds)
+}
 
-	url := URL(inv.EnvironmentCode, cuds)
-
-	ambLabel := strconv.Itoa(func() int {
-		if inv.EnvironmentCode == "2" {
-			return 2
-		}
-		return 1
-	}())
-
-	return fmt.Sprintf(
-		"N°DocSoporte=%s\nFecha=%s\nHora=%s\nValDS=%s\nCodImp=%s\nValImp=%s\nValTot=%s\nNumSNO=%s\nNITABS=%s\nPIN:%s\nAmb:%s\nCUDS=%s\nURL=%s",
-		inv.Prefix+inv.Number,
-		inv.IssueDate,
-		inv.IssueTime,
-		domain.FormatCents(inv.Totals.LineExtensionCents),
-		codImp,
-		valImp,
-		domain.FormatCents(inv.Totals.PayableCents),
-		inv.Supplier.Identification.Number,
-		inv.Customer.Identification.Number,
-		softwarePIN,
-		ambLabel,
-		cuds,
-		url,
-	)
+// AdjustmentNoteContent returns AdjustmentNoteText; softwarePIN is ignored.
+//
+// Deprecated: it used to put the software PIN, which is secret, in the QR text, and its field
+// names did not follow the annex. Use AdjustmentNoteText for the printed QR and URL for
+// sts:QRCode.
+func AdjustmentNoteContent(inv domain.Document, cuds, softwarePIN string) string {
+	return AdjustmentNoteText(inv, cuds)
 }

@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] — 2026-11-22
+
+### Added
+
+- `qr.SupportDocumentText` and `qr.AdjustmentNoteText`: the text of the QR printed on the
+  graphic representation of a support document and of its adjustment note, as defined in
+  section 12.2 of the support document annex (Resolution 000167 of 2021): `NumDS`, `FecDS`,
+  `HorDS`, `NumSNO`, `DocAdq`, `ValDS`, `ValIva`, `ValTolDS`, `CUDS` and `QRCode` (`NumNAS`,
+  `FecNAS`, `HorNAS`, `ValNAS` and `ValTolNAS` on the note). `ValIva` adds up only the IVA
+  (tax 01). Where the annex's example and its field definition differ (the example names the
+  acquirer `NITABS`), the definition wins.
+
+### Deprecated
+
+- `qr.SupportDocumentContent` and `qr.AdjustmentNoteContent`. They put the software PIN,
+  which is secret, in the QR text, used field names outside the annex and added `Amb`. They
+  now return the new annex text and ignore `softwarePIN`. Neither block goes in `sts:QRCode`:
+  annex rules DSAB36 and NSAB36 ask for the plain URL there (`qr.SupportDocumentURL`,
+  `qr.URL`).
+
 ## [2.3.0] — 2026-11-22
 
 ### Added
