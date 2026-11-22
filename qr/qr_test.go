@@ -119,3 +119,34 @@ func TestDeprecatedContentHasNoPIN(t *testing.T) {
 		t.Error("the deprecated functions must return the annex text")
 	}
 }
+
+// TestInvoiceText checks the block of annex 1.9, section 11.7: IVA apart, the INC under
+// ValOtroIm, withholdings out.
+func TestInvoiceText(t *testing.T) {
+	doc := sample("1")
+	doc.Prefix, doc.Number = "FE", "500"
+	doc.WithholdingTaxes = []domain.Tax{{TypeCode: "06", TaxAmountCents: 275_000}}
+	want := "NumFac: FE500\n" +
+		"FecFac: 2026-11-20\n" +
+		"HorFac: 09:30:00-05:00\n" +
+		"NitFac: 1020304050\n" +
+		"DocAdq: 900123456\n" +
+		"ValFac: 110000.00\n" +
+		"ValIva: 19500.00\n" +
+		"ValOtroIm: 800.00\n" +
+		"ValTolFac: 130300.00\n" +
+		"CUFE: " + cuds + "\n" +
+		"QRCode: https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=" + cuds
+	if got := InvoiceText(doc, cuds); got != want {
+		t.Errorf("InvoiceText() =\n%s\nwant\n%s", got, want)
+	}
+}
+
+// TestNoteText names the key CUDE and keeps the invoice fields.
+func TestNoteText(t *testing.T) {
+	got := NoteText(sample("2"), cuds)
+	if !strings.Contains(got, "\nCUDE: "+cuds+"\n") || strings.Contains(got, "CUFE") ||
+		!strings.HasPrefix(got, "NumFac: SEDS984000014\n") {
+		t.Errorf("NoteText() =\n%s", got)
+	}
+}
