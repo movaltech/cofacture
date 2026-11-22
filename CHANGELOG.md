@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] — 2026-11-22
+
+### Added
+
+- `domain.Line.BrandName` and `ModelName`: the item's brand and model, written as
+  `cac:Item/cbc:BrandName` and `cbc:ModelName` after its description, in every document with
+  lines. Both are optional; DIAN notifies their absence (FAZ04/FAZ05 on invoices, NSAZ04/NSAZ05
+  on adjustment notes) and accepts the document, so they stay empty when the item has none.
+
 ## [2.2.2] — 2026-11-19
 
 ### Fixed
