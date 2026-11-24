@@ -58,3 +58,21 @@ func TestEquivalentExtensions(t *testing.T) {
 		t.Error("a regular invoice rendered Documento Equivalente extensions")
 	}
 }
+
+func TestAdditionalDocumentReference(t *testing.T) {
+	inv := samplePOSInvoice()
+	if got := buildString(t, inv); strings.Contains(got, "AdditionalDocumentReference") {
+		t.Error("a document without references rendered one")
+	}
+	inv.DocumentTypeCode = "08"
+	inv.AdditionalDocumentReferences = []domain.AdditionalDocumentReference{{ID: "POS1", IssueDate: "2026-11-24"}}
+	got := buildString(t, inv)
+	want := "<cac:AdditionalDocumentReference><cbc:ID>POS1</cbc:ID><cbc:IssueDate>2026-11-24</cbc:IssueDate></cac:AdditionalDocumentReference>"
+	if !strings.Contains(strings.Join(strings.Fields(got), ""), want) {
+		t.Errorf("the reference is not rendered as %s", want)
+	}
+	// UBL 2.1 order: after the document's own fields, before the supplier.
+	if strings.Index(got, "<cac:AdditionalDocumentReference>") > strings.Index(got, "<cac:AccountingSupplierParty>") {
+		t.Error("the reference went after the supplier party")
+	}
+}

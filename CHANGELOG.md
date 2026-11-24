@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.7.0] — 2026-11-24
+
+### Added
+
+- `domain.Document.AdditionalDocumentReferences`: other documents a document references, each
+  rendered as a `cac:AdditionalDocumentReference` (`cbc:ID` with an optional `@schemeName`,
+  `cbc:IssueDate`, `cbc:DocumentTypeCode`) after `cac:OrderReference`. The Documento
+  Equivalente annex V1.0 requires one on a contingency document of type `"08"` (rule DEAI01);
+  what it references is the caller's decision. Not yet submitted to DIAN.
+- `soap.HTTPError`: an HTTP answer with neither a `soap:Fault` nor the expected response (e.g.
+  a 503 page) is now this error, with its `StatusCode` and body, instead of a plain error, so a
+  caller can apply the rules for DIAN's technical problems (Documento Equivalente annex V1.0,
+  section 15.3). Its message is the same as before.
+
 ## [2.6.0] — 2026-11-23
 
 ### Added

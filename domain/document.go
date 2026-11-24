@@ -40,6 +40,12 @@ type Document struct {
 
 	OrderReferenceNumber string // optional
 
+	// AdditionalDocumentReferences are other documents this one references
+	// (cac:AdditionalDocumentReference), rendered in order. The Documento Equivalente annex
+	// V1.0 requires one on a contingency document of type 08 (rule DEAI01); what it references
+	// is the caller's decision.
+	AdditionalDocumentReferences []AdditionalDocumentReference
+
 	Supplier Party
 	Customer Party
 

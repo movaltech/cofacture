@@ -707,3 +707,22 @@ func TestCall_RejectsOversizedResponse(t *testing.T) {
 		t.Fatalf("err = %v, want a response-size error", err)
 	}
 }
+
+// TestHTTPError: an answer that is not a SOAP envelope, such as a proxy's 503 page, is an
+// *HTTPError with its status, so a caller can tell DIAN's outages apart.
+func TestHTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.ReadAll(r.Body)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, _ = w.Write([]byte("<html><body>Service Unavailable</body></html>"))
+	}))
+	defer server.Close()
+
+	cert, key := generateTestCert(t)
+	c := &Client{BaseURL: server.URL, Cert: cert, Key: key, HTTPClient: server.Client()}
+	_, err := c.GetNumberingRange(t.Context(), "6382356", "6382356", "any-software-id")
+	var httpErr *HTTPError
+	if !errors.As(err, &httpErr) || httpErr.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("err = %v, want an *HTTPError with 503", err)
+	}
+}

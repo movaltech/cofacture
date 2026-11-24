@@ -69,6 +69,7 @@ func BuildInvoice(inv domain.Document) (*etree.Document, error) {
 	if inv.OrderReferenceNumber != "" {
 		root.CreateElement("cac:OrderReference").CreateElement("cbc:ID").SetText(inv.OrderReferenceNumber)
 	}
+	appendAdditionalDocumentReferences(root, inv.AdditionalDocumentReferences)
 
 	appendAccountingParty(root, "AccountingSupplierParty", inv.Supplier, true, inv.Prefix, true)
 	appendAccountingParty(root, "AccountingCustomerParty", inv.Customer, false, "", false)
