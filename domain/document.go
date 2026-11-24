@@ -73,6 +73,12 @@ type Document struct {
 	NumberingRange   NumberingRange
 	SoftwareProvider SoftwareProvider
 
+	// SoftwareManufacturer, POSBuyerBenefits and POSCashRegister are the extensions of the
+	// Documento Equivalente Electrónico (see equivalent.go). Each is rendered only when set.
+	SoftwareManufacturer *SoftwareManufacturer
+	POSBuyerBenefits     *POSBuyerBenefits
+	POSCashRegister      *POSCashRegister
+
 	CUFE                 string
 	SoftwareSecurityCode string
 	QRURL                string
