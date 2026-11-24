@@ -34,3 +34,13 @@ type POSCashRegister struct {
 
 	SubtotalCents int64 // "SubTotal": subtotal of the sale
 }
+
+// AdditionalDocumentReference is a cac:AdditionalDocumentReference (Documento Equivalente annex
+// V1.0, DEAI01-DEAI06): a document this one references. Only ID is required; the empty fields
+// are not rendered.
+type AdditionalDocumentReference struct {
+	ID               string // cbc:ID: prefix and number of the referenced document
+	SchemeName       string // cbc:ID/@schemeName, e.g. the hash scheme of a referenced key
+	IssueDate        string // cbc:IssueDate, YYYY-MM-DD
+	DocumentTypeCode string // cbc:DocumentTypeCode, the issuer's own code
+}

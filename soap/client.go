@@ -57,6 +57,19 @@ func (f *Fault) Error() string {
 	return fmt.Sprintf("soap fault [%s]: %s", f.Code, f.Reason)
 }
 
+// HTTPError is an HTTP answer that carries neither a soap:Fault nor the expected response: the
+// service itself failed (e.g. 503 Service Unavailable). StatusCode lets the caller apply the
+// annexes' rules for DIAN's technical problems (Documento Equivalente annex V1.0, section 15.3);
+// the client does not decide what they mean.
+type HTTPError struct {
+	StatusCode int
+	Body       []byte // the answer as received, bounded
+}
+
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("soap: HTTP %d with no explicit soap:Fault:\n%s", e.StatusCode, e.Body)
+}
+
 type soapFaultXML struct {
 	Code struct {
 		Value string `xml:"Value"`
@@ -113,6 +126,9 @@ func (c *Client) call(ctx context.Context, action string, bodyBuilder func(body 
 		} `xml:"http://www.w3.org/2003/05/soap-envelope Body"`
 	}
 	if err := xml.Unmarshal(respBody, &envelope); err != nil {
+		if resp.StatusCode != http.StatusOK {
+			return &HTTPError{StatusCode: resp.StatusCode, Body: respBody}
+		}
 		return fmt.Errorf("soap: parse response (HTTP %d, headers %v, %d bytes): %w\n%s", resp.StatusCode, resp.Header, len(respBody), err, respBody)
 	}
 	if envelope.Body.Fault != nil {
@@ -128,7 +144,7 @@ func (c *Client) call(ctx context.Context, action string, bodyBuilder func(body 
 	// give a clearer error message if the body isn't the expected response.
 	if err := xml.Unmarshal(envelope.Body.Content, out); err != nil {
 		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("soap: HTTP %d with no explicit soap:Fault:\n%s", resp.StatusCode, respBody)
+			return &HTTPError{StatusCode: resp.StatusCode, Body: respBody}
 		}
 		return fmt.Errorf("soap: parse %sResponse: %w", action, err)
 	}

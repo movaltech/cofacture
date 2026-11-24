@@ -153,3 +153,22 @@ func appendNameValueExtension(extensions *etree.Element, group, info string, pai
 		el.CreateElement("Value").SetText(p[1])
 	}
 }
+
+// appendAdditionalDocumentReferences renders each reference as a cac:AdditionalDocumentReference
+// in UBL 2.1's order (after cac:OrderReference, before the parties); empty fields are left out.
+func appendAdditionalDocumentReferences(root *etree.Element, refs []domain.AdditionalDocumentReference) {
+	for _, r := range refs {
+		ref := root.CreateElement("cac:AdditionalDocumentReference")
+		id := ref.CreateElement("cbc:ID")
+		id.SetText(r.ID)
+		if r.SchemeName != "" {
+			id.CreateAttr("schemeName", r.SchemeName)
+		}
+		if r.IssueDate != "" {
+			ref.CreateElement("cbc:IssueDate").SetText(r.IssueDate)
+		}
+		if r.DocumentTypeCode != "" {
+			ref.CreateElement("cbc:DocumentTypeCode").SetText(r.DocumentTypeCode)
+		}
+	}
+}
