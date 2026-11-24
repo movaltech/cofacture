@@ -4,6 +4,18 @@
     <ext:UBLExtension>
       <ext:ExtensionContent>
         <sts:DianExtensions>
+          <sts:InvoiceControl>
+            <sts:InvoiceAuthorization>18760000001</sts:InvoiceAuthorization>
+            <sts:AuthorizationPeriod>
+              <cbc:StartDate>2024-01-15</cbc:StartDate>
+              <cbc:EndDate>2026-01-15</cbc:EndDate>
+            </sts:AuthorizationPeriod>
+            <sts:AuthorizedInvoices>
+              <sts:Prefix>SETP</sts:Prefix>
+              <sts:From>1</sts:From>
+              <sts:To>5000</sts:To>
+            </sts:AuthorizedInvoices>
+          </sts:InvoiceControl>
           <sts:InvoiceSource>
             <cbc:IdentificationCode listAgencyID="6" listAgencyName="United Nations Economic Commission for Europe" listSchemeURI="urn:oasis:names:specification:ubl:codelist:gc:CountryIdentificationCode-2.1">CO</cbc:IdentificationCode>
           </sts:InvoiceSource>
@@ -17,6 +29,54 @@
           </sts:AuthorizationProvider>
           <sts:QRCode/>
         </sts:DianExtensions>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <FabricanteSoftware>
+          <InformacionDelFabricanteDelSoftware>
+            <Name>NombreApellido</Name>
+            <Value>Fabricante Ejemplo</Value>
+            <Name>RazonSocial</Name>
+            <Value>Software Ejemplo SAS</Value>
+            <Name>NombreSoftware</Name>
+            <Value>Ejemplo POS</Value>
+          </InformacionDelFabricanteDelSoftware>
+        </FabricanteSoftware>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <BeneficiosComprador>
+          <InformacionBeneficiosComprador>
+            <Name>Codigo</Name>
+            <Value>222222222222</Value>
+            <Name>NombresApellidos</Name>
+            <Value>Consumidor final</Value>
+            <Name>Puntos</Name>
+            <Value>0</Value>
+          </InformacionBeneficiosComprador>
+        </BeneficiosComprador>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <PuntoVenta>
+          <InformacionCajaVenta>
+            <Name>PlacaCaja</Name>
+            <Value>CAJA-01</Value>
+            <Name>UbicaciónCaja</Name>
+            <Value>Piso 1</Value>
+            <Name>Cajero</Name>
+            <Value>Ana Pérez</Value>
+            <Name>TipoCaja</Name>
+            <Value>Registradora</Value>
+            <Name>CódigoVenta</Name>
+            <Value>V-000123</Value>
+            <Name>SubTotal</Name>
+            <Value>1000.00</Value>
+          </InformacionCajaVenta>
+        </PuntoVenta>
       </ext:ExtensionContent>
     </ext:UBLExtension>
     <ext:UBLExtension>

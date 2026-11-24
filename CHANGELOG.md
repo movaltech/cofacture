@@ -5,6 +5,31 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.6.0] — 2026-11-23
+
+### Added
+
+- The extensions of the Documento Equivalente Electrónico (Technical Annex Documento
+  Equivalente Electrónico V1.0), as optional fields of `domain.Document`, each rendered in its
+  own `ext:UBLExtension` only when set:
+  - `SoftwareManufacturer` → `FabricanteSoftware/InformacionDelFabricanteDelSoftware`
+    (`NombreApellido`, `RazonSocial` when given, `NombreSoftware`; section 8.1), which every
+    equivalent document carries;
+  - `POSBuyerBenefits` → `BeneficiosComprador/InformacionBeneficiosComprador` (`Codigo`,
+    `NombresApellidos`, `Puntos`; section 8.2.1.1), spelled with a B like rule DEPD15 and the
+    published examples, where the annex tables say `Veneficios`;
+  - `POSCashRegister` → `PuntoVenta/InformacionCajaVenta` (`PlacaCaja`, `UbicaciónCaja`,
+    `Cajero`, `TipoCaja`, `CódigoVenta`, `SubTotal`; section 8.2.1.2).
+
+  The annex gives no XML example; the nesting follows its XPath columns. Not yet submitted to
+  DIAN.
+
+### Fixed
+
+- The POS ticket (`DocumentTypeCode` `"20"`) now carries `sts:InvoiceControl`, the numbering
+  DIAN authorized (annex rules DEAB04-DEAB13, "only for the POS"). It also does in contingency
+  (`"07"`, `"08"`, annex section 15: same prefix and number) when the numbering range is set.
+
 ## [2.5.0] — 2026-11-22
 
 ### Added

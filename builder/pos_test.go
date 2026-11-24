@@ -24,6 +24,10 @@ func samplePOSInvoice() domain.Document {
 	inv.OperationTypeCode = "10"
 	inv.DocumentTypeCode = "20"
 	inv.HashType = "CUDE-SHA384"
+	// The three extensions the annex requires on a POS ticket (sections 8.1, 8.2.1.1, 8.2.1.2).
+	inv.SoftwareManufacturer = &domain.SoftwareManufacturer{Name: "Fabricante Ejemplo", LegalName: "Software Ejemplo SAS", SoftwareName: "Ejemplo POS"}
+	inv.POSBuyerBenefits = &domain.POSBuyerBenefits{Code: "222222222222", Name: "Consumidor final", Points: "0"}
+	inv.POSCashRegister = &domain.POSCashRegister{Plate: "CAJA-01", Location: "Piso 1", Cashier: "Ana Pérez", Type: "Registradora", SaleCode: "V-000123", SubtotalCents: 100000}
 	return inv
 }
 
