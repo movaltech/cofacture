@@ -29,4 +29,7 @@ func appendBillingReference(parent *etree.Element, node string, br domain.Billin
 	uuid.CreateAttr("schemeName", br.HashType)
 	uuid.SetText(br.CUFE)
 	ref.CreateElement("cbc:IssueDate").SetText(br.IssueDate)
+	if br.DocumentTypeCode != "" {
+		ref.CreateElement("cbc:DocumentTypeCode").SetText(br.DocumentTypeCode)
+	}
 }

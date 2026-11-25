@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.8.0] — 2026-11-25
+
+### Added
+
+- `domain.BillingReference.DocumentTypeCode`: the referenced document's type, rendered as
+  `cbc:DocumentTypeCode` after `cbc:IssueDate` in `cac:BillingReference/cac:InvoiceDocumentReference`
+  only when set. An adjustment note to a Documento Equivalente Electrónico names the document it
+  adjusts (`"20"` for a POS ticket; rule NABG07 of the Documento Equivalente annex V1.0): DIAN
+  accepted a POS credit note without it in habilitación but notified NABG07. Notes to invoices
+  leave it empty and render as before.
+
 ## [2.7.0] — 2026-11-24
 
 ### Added

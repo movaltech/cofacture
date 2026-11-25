@@ -31,6 +31,8 @@ func samplePOSCreditAdjustment() domain.CreditNote {
 		CUFE:      "db07502cd11c006f4666e2e299fd77e5a47bd790d9da18786dace4b4d0c4b8972643843e8b7444fe23a0fc8aa1fdf5f2",
 		IssueDate: "2024-01-20",
 		HashType:  "CUDE-SHA384", // references a Documento Equivalente Electrónico (POS), not an Invoice
+
+		DocumentTypeCode: "20", // the referenced document is a POS ticket (rule NABG07)
 	}
 	return cn
 }
@@ -48,6 +50,8 @@ func samplePOSDebitAdjustment() domain.DebitNote {
 		CUFE:      "db07502cd11c006f4666e2e299fd77e5a47bd790d9da18786dace4b4d0c4b8972643843e8b7444fe23a0fc8aa1fdf5f2",
 		IssueDate: "2024-01-20",
 		HashType:  "CUDE-SHA384", // references a Documento Equivalente Electrónico (POS), not an Invoice
+
+		DocumentTypeCode: "20", // the referenced document is a POS ticket (rule NABG07)
 	}
 	return dn
 }

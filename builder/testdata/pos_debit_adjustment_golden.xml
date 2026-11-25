@@ -43,6 +43,7 @@
       <cbc:ID>SETP1</cbc:ID>
       <cbc:UUID schemeName="CUDE-SHA384">db07502cd11c006f4666e2e299fd77e5a47bd790d9da18786dace4b4d0c4b8972643843e8b7444fe23a0fc8aa1fdf5f2</cbc:UUID>
       <cbc:IssueDate>2024-01-20</cbc:IssueDate>
+      <cbc:DocumentTypeCode>20</cbc:DocumentTypeCode>
     </cac:InvoiceDocumentReference>
   </cac:BillingReference>
   <cac:AccountingSupplierParty>
