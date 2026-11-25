@@ -16,6 +16,13 @@ type BillingReference struct {
 	// Electrónico (e.g. a POS ticket, DocumentTypeCode "93"/"94"). It must match the referenced
 	// document's actual HashType, not this note's own — the two can differ.
 	HashType string
+
+	// DocumentTypeCode is the referenced document's type (cbc:DocumentTypeCode), rendered after
+	// cbc:IssueDate only when set. An adjustment note to a Documento Equivalente Electrónico
+	// names it ("20" for a POS ticket): Technical Annex Documento Equivalente Electrónico V1.0,
+	// rule NABG07. DIAN notified a POS credit note without it in habilitación. Invoices' notes
+	// leave it empty.
+	DocumentTypeCode string
 }
 
 // DiscrepancyResponse is the note's reason (cac:DiscrepancyResponse) — required when the note
