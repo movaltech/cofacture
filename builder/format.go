@@ -18,6 +18,12 @@ func formatQuantity(q decimal.Decimal) string {
 	return domain.FormatFixed(q, 6)
 }
 
+// formatMeasure renders the quantity of a nominal tax (cbc:BaseUnitMeasure) with 2 decimals,
+// the precision rules FAS09 and DEAS09 give it.
+func formatMeasure(m decimal.Decimal) string {
+	return domain.FormatFixed(m, 2)
+}
+
 // formatPercent renders a tax percentage with 2 decimals.
 func formatPercent(p decimal.Decimal) string {
 	return domain.FormatFixed(p, 2)

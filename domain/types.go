@@ -65,13 +65,44 @@ type Party struct {
 }
 
 // Tax is a tax subtotal, at either line or header level.
+//
+// A tax is either a percentage of a taxable base (IVA, INC, ICUI...: TaxableAmountCents and
+// Percent) or a nominal value per unit (IBUA "34", ICL "32", INPP "33", plastic bags "22",
+// fuels "23"/"24"...: BaseUnitCode, BaseUnitMeasure and PerUnitAmountCents). Setting
+// BaseUnitCode makes it nominal: the subtotal then carries cbc:BaseUnitMeasure and
+// cbc:PerUnitAmount instead of cbc:Percent, as in DIAN's examples (rules FAS09-FAS12 of the
+// invoice annex, DEAS09-DEAS12 of the Documento Equivalente annex).
+//
+// TaxAmountCents is always the caller's: the formula depends on the tax. IBUA is
+// PerUnitAmount x BaseUnitMeasure / 100 (a rate per 100 ml), ICL and INPP are PerUnitAmount x
+// BaseUnitMeasure, and DIAN's plastic bag example informs BaseUnitMeasure 1 with the tax of
+// all the bags of the line (rule FAS07). The builder renders the value it is given.
 type Tax struct {
+	// TaxableAmountCents is cbc:TaxableAmount. Always rendered for a percentage tax; for a
+	// nominal tax only when not zero, since DIAN's examples leave it out.
 	TaxableAmountCents int64
 	TaxAmountCents     int64
-	Percent            decimal.Decimal // e.g. decimal.MustParse("19"); rendered with 2 decimals
-	TypeCode           string          // tax_types catalog, e.g. "01" = VAT
-	TypeName           string
+	// Percent is cbc:Percent, e.g. decimal.MustParse("19"); rendered with 2 decimals. Not
+	// rendered for a nominal tax.
+	Percent  decimal.Decimal
+	TypeCode string // tax_types catalog, e.g. "01" = VAT, "34" = IBUA
+	TypeName string
+
+	// BaseUnitCode is the @unitCode of cbc:BaseUnitMeasure (units table, e.g. "MLT"
+	// milliliters for IBUA, "NIU" units for plastic bags, "LTR", "GRM", "GLL"). Setting it
+	// makes the tax nominal.
+	BaseUnitCode string
+	// BaseUnitMeasure is cbc:BaseUnitMeasure, the taxed quantity in BaseUnitCode (e.g. 25000
+	// ml); rendered with 2 decimals.
+	BaseUnitMeasure decimal.Decimal
+	// PerUnitAmountCents is cbc:PerUnitAmount, the nominal value of the tax per unit (e.g.
+	// $18 per 100 ml of a sugary drink).
+	PerUnitAmountCents int64
 }
+
+// Nominal reports whether the tax is a value per unit (BaseUnitCode set) rather than a
+// percentage of a taxable base.
+func (t Tax) Nominal() bool { return t.BaseUnitCode != "" }
 
 // ReferencePrice is used for free samples or no-charge items (PricingReference).
 type ReferencePrice struct {

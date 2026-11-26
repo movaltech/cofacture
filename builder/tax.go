@@ -77,16 +77,33 @@ func appendTaxTotalOfType(parent *etree.Element, taxes []domain.Tax, currency st
 	for _, t := range taxes {
 		sub := taxTotal.CreateElement("cac:TaxSubtotal")
 
-		taxable := sub.CreateElement("cbc:TaxableAmount")
-		taxable.CreateAttr("currencyID", currency)
-		taxable.SetText(formatAmount(t.TaxableAmountCents))
+		// UBL 2.1 order: TaxableAmount, TaxAmount, Percent, BaseUnitMeasure, PerUnitAmount,
+		// TaxCategory. A nominal tax carries BaseUnitMeasure and PerUnitAmount instead of the
+		// category's Percent, and TaxableAmount only when set (DIAN's examples omit it).
+		if !t.Nominal() || t.TaxableAmountCents != 0 {
+			taxable := sub.CreateElement("cbc:TaxableAmount")
+			taxable.CreateAttr("currencyID", currency)
+			taxable.SetText(formatAmount(t.TaxableAmountCents))
+		}
 
 		taxAmt := sub.CreateElement("cbc:TaxAmount")
 		taxAmt.CreateAttr("currencyID", currency)
 		taxAmt.SetText(formatAmount(t.TaxAmountCents))
 
+		if t.Nominal() {
+			measure := sub.CreateElement("cbc:BaseUnitMeasure")
+			measure.CreateAttr("unitCode", t.BaseUnitCode)
+			measure.SetText(formatMeasure(t.BaseUnitMeasure))
+
+			perUnit := sub.CreateElement("cbc:PerUnitAmount")
+			perUnit.CreateAttr("currencyID", currency)
+			perUnit.SetText(formatAmount(t.PerUnitAmountCents))
+		}
+
 		category := sub.CreateElement("cac:TaxCategory")
-		category.CreateElement("cbc:Percent").SetText(formatPercent(t.Percent))
+		if !t.Nominal() {
+			category.CreateElement("cbc:Percent").SetText(formatPercent(t.Percent))
+		}
 		scheme := category.CreateElement("cac:TaxScheme")
 		scheme.CreateElement("cbc:ID").SetText(t.TypeCode)
 		scheme.CreateElement("cbc:Name").SetText(t.TypeName)

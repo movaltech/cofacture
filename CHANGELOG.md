@@ -5,7 +5,32 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
-## [2.9.0] — 2026-11-25
+## [2.10.0] — 2026-11-25
+
+### Added
+
+- Nominal taxes, a value per unit instead of a percentage: IBUA (`"34"`, sugary drinks), ICL
+  (`"32"`), INPP (`"33"`), the plastic bag tax (`"22"`) and the fuel taxes (`"23"`, `"24"`),
+  among others. `domain.Tax` gains `BaseUnitCode`, `BaseUnitMeasure` and `PerUnitAmountCents`;
+  setting `BaseUnitCode` makes the tax nominal (`Tax.Nominal`). Its `cac:TaxSubtotal` then
+  carries `cbc:BaseUnitMeasure` (with its `@unitCode`, 2 decimals) and `cbc:PerUnitAmount`
+  instead of `cbc:Percent`, and `cbc:TaxableAmount` only when set, as in DIAN's own examples
+  (Caja de herramientas FE V1.9 v2026-2; rules FAS09-FAS12 of the invoice annex, DEAS09-DEAS12
+  of the Documento Equivalente annex). This works at header and line level in every
+  document. `TaxAmountCents` stays the caller's, since the formula depends on the tax (IBUA
+  divides by 100, a rate per 100 ml). Percentage taxes build as before. Not yet submitted to
+  DIAN.
+
+### Fixed
+
+- Ships the change announced for 2.9.0 (`cbc:PrepaidAmount` on every document built with
+  `BuildInvoice`). The `v2.9.0` tag was put on the 2.8.1 commit by mistake, so that version
+  has the content of 2.8.1; `go.mod` retracts it and `go get` skips it.
+
+## [2.9.0] — 2026-11-25 [YANKED]
+
+Tagged on the 2.8.1 commit by mistake: `v2.9.0` has the content of 2.8.1 and none of the
+change below, which ships in 2.10.0.
 
 ### Changed
 
@@ -336,6 +361,7 @@ Initial release.
   contract, for both habilitación and producción.
 - Response parser turning DIAN's validation output into a structured result.
 
+[2.10.0]: https://github.com/movaltech/cofacture/compare/v2.8.1...v2.10.0
 [2.9.0]: https://github.com/movaltech/cofacture/compare/v2.8.1...v2.9.0
 [2.8.1]: https://github.com/movaltech/cofacture/compare/v2.8.0...v2.8.1
 [2.8.0]: https://github.com/movaltech/cofacture/compare/v2.7.0...v2.8.0
