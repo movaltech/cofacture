@@ -17,5 +17,9 @@ require (
 	github.com/stretchr/testify v1.11.1 // indirect
 )
 
-// v2.2.0 was tagged on the 2.1.0 commit by mistake and lacks its changes; use v2.2.1.
-retract v2.2.0
+retract (
+	// Tagged on the 2.8.1 commit by mistake and lacks its changes; use v2.10.0.
+	v2.9.0
+	// Tagged on the 2.1.0 commit by mistake and lacks its changes; use v2.2.1.
+	v2.2.0
+)

@@ -14,6 +14,7 @@ A Go library for Colombian DIAN electronic invoicing: UBL 2.1 document generatio
 ## Features
 
 - **Full document coverage** — Electronic Sales Invoice, Credit Note, Debit Note, Support Document, Adjustment Note to the Support Document, Attached Document, the five RADIAN acceptance/rejection events, Individual Electronic Payroll, and Documento Equivalente Electrónico (POS ticket and its other sub-types).
+- **Percentage and nominal taxes** — IVA, INC, ICUI and the like as a percentage of a taxable base; IBUA (sugary drinks), ICL, INPP, plastic bags and fuels as a value per unit (`cbc:BaseUnitMeasure`/`cbc:PerUnitAmount`), at header and line level.
 - **Discounts, charges, advance payments and withholdings** — `cac:AllowanceCharge` at line and document level, `cac:PrepaidPayment`, and `cac:WithholdingTaxTotal`, each placed where the schema of every document type puts it.
 - **XAdES-EPES signing** — inclusive C14N 1.0 canonicalization, RSA-SHA256, DIAN's fixed signature policy, built from PEM or PKCS#12 (`.p12`/`.pfx`) certificates.
 - **Hash formulas verified against DIAN's own published worked examples** (Technical Annex 1.9), not just internal regression tests — CUFE, CUDE, CUDS, and CUNE each have a dedicated test reproducing DIAN's official example.
