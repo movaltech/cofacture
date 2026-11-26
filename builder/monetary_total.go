@@ -11,7 +11,12 @@ import (
 // appendMonetaryTotal adds the totals block — shared by Invoice, CreditNote and DebitNote.
 // node is "LegalMonetaryTotal" for Invoice/CreditNote, "RequestedMonetaryTotal" for DebitNote
 // (same content, different element name — verified in section 8.4 of the technical annex).
-func appendMonetaryTotal(parent *etree.Element, node string, t domain.Totals, currency, documentTypeCode string) {
+//
+// prepaid adds cbc:PrepaidAmount when t.PrepaidCents > 0. BuildInvoice passes true, whatever
+// the document type: the invoice annex (FBD01) and the Documento Equivalente annex (DEBD01,
+// DEAU12) give the Invoice its advance payments. The other builders pass false, as they render
+// no cac:PrepaidPayment.
+func appendMonetaryTotal(parent *etree.Element, node string, t domain.Totals, currency string, prepaid bool) {
 	el := parent.CreateElement("cac:" + node)
 
 	line := el.CreateElement("cbc:LineExtensionAmount")
@@ -37,7 +42,7 @@ func appendMonetaryTotal(parent *etree.Element, node string, t domain.Totals, cu
 		charge.SetText(formatAmount(t.ChargeTotalCents))
 	}
 
-	if documentTypeCode == "01" && t.PrepaidCents > 0 {
+	if prepaid && t.PrepaidCents > 0 {
 		prepaid := el.CreateElement("cbc:PrepaidAmount")
 		prepaid.CreateAttr("currencyID", currency)
 		prepaid.SetText(formatAmount(t.PrepaidCents))

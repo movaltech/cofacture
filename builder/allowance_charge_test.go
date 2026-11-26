@@ -59,6 +59,47 @@ func TestBuildInvoice_AllowancesPrepaidWithholdings(t *testing.T) {
 	assertOrder(t, line, []string{"<cbc:LineExtensionAmount", "<cac:AllowanceCharge>", "<cac:TaxTotal>", "<cac:Item>"})
 }
 
+// TestBuild_PrepaidAmountByBuilder checks that cbc:PrepaidAmount follows the builder, not the
+// type code: BuildInvoice renders it for an invoice and a POS ticket (Documento Equivalente
+// annex DEBD01, DEAU12), and the notes still leave it out.
+func TestBuild_PrepaidAmountByBuilder(t *testing.T) {
+	const prepaidAmount = `<cbc:PrepaidAmount currencyID="COP">50.00</cbc:PrepaidAmount>`
+	withPrepaid := func(doc domain.Document) domain.Document {
+		doc.PrepaidPayments = []domain.PrepaidPayment{{ID: "ANT-1", PaidAmountCents: 5000, ReceivedDate: "2026-11-01"}}
+		doc.Totals.PrepaidCents = 5000
+		return doc
+	}
+
+	for name, doc := range map[string]domain.Document{"invoice": sampleInvoice(), "POS ticket": samplePOSInvoice()} {
+		tree, err := BuildInvoice(withPrepaid(doc))
+		if err != nil {
+			t.Fatal(err)
+		}
+		xml, err := tree.WriteToString()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(compact(xml), prepaidAmount) {
+			t.Errorf("%s: missing %s", name, prepaidAmount)
+		}
+		assertOrder(t, xml, []string{"<cac:PrepaidPayment>", "<cac:LegalMonetaryTotal>", "<cbc:PrepaidAmount", "<cbc:PayableAmount"})
+	}
+
+	cn := samplePOSCreditAdjustment()
+	cn.Document = withPrepaid(cn.Document)
+	tree, err := BuildCreditNote(cn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	xml, err := tree.WriteToString()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(xml, "Prepaid") {
+		t.Error("a credit note renders no advance payments")
+	}
+}
+
 func compact(xml string) string {
 	var b strings.Builder
 	for _, l := range strings.Split(xml, "\n") {

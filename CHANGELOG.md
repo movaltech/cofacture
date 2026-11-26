@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.9.0] — 2026-11-25
+
+### Changed
+
+- `cbc:PrepaidAmount` (`Totals.PrepaidCents`) is rendered by `BuildInvoice` for every document
+  type, not only the invoice `"01"`. A POS ticket or any other Documento Equivalente with
+  advance payments carried `cac:PrepaidPayment` but not their total; the annex gives it both
+  (DEBD01, DEAU12), and so does the invoice annex for the other invoice types. Documents
+  without advance payments, the notes and the Support Document build as before: they render
+  no advance payments.
+
 ## [2.8.1] — 2026-11-25
 
 ### Fixed
@@ -325,6 +336,7 @@ Initial release.
   contract, for both habilitación and producción.
 - Response parser turning DIAN's validation output into a structured result.
 
+[2.9.0]: https://github.com/movaltech/cofacture/compare/v2.8.1...v2.9.0
 [2.8.1]: https://github.com/movaltech/cofacture/compare/v2.8.0...v2.8.1
 [2.8.0]: https://github.com/movaltech/cofacture/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/movaltech/cofacture/compare/v2.6.0...v2.7.0

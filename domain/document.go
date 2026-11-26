@@ -69,8 +69,8 @@ type Document struct {
 	// base; their sums go to Totals.AllowanceTotalCents and Totals.ChargeTotalCents.
 	AllowanceCharges []AllowanceCharge
 
-	// PrepaidPayments are advance payments (Invoice only); their sum goes to
-	// Totals.PrepaidCents.
+	// PrepaidPayments are advance payments, rendered by BuildInvoice only (invoices and every
+	// Documento Equivalente); their sum goes to Totals.PrepaidCents.
 	PrepaidPayments []PrepaidPayment
 
 	Totals Totals

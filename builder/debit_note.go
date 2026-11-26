@@ -75,7 +75,7 @@ func BuildDebitNote(dn domain.DebitNote) (*etree.Document, error) {
 	}
 
 	appendTaxTotal(root, dn.HeaderTaxes, dn.CurrencyCode)
-	appendMonetaryTotal(root, "RequestedMonetaryTotal", dn.Totals, dn.CurrencyCode, dn.DocumentTypeCode)
+	appendMonetaryTotal(root, "RequestedMonetaryTotal", dn.Totals, dn.CurrencyCode, false)
 
 	for i, line := range dn.Lines {
 		appendDocumentLine(root, "DebitNoteLine", "DebitedQuantity", i+1, line, dn.CurrencyCode, dn.DocumentTypeCode, dn.Supplier.Identification, "")

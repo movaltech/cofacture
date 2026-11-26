@@ -74,7 +74,7 @@ func BuildCreditNote(cn domain.CreditNote) (*etree.Document, error) {
 	appendAllowanceCharges(root, cn.AllowanceCharges, cn.CurrencyCode)
 	appendTaxTotal(root, cn.HeaderTaxes, cn.CurrencyCode)
 	// The UBL 2.1 CreditNote schema has no WithholdingTaxTotal (DIAN rejects it with ZB01).
-	appendMonetaryTotal(root, "LegalMonetaryTotal", cn.Totals, cn.CurrencyCode, cn.DocumentTypeCode)
+	appendMonetaryTotal(root, "LegalMonetaryTotal", cn.Totals, cn.CurrencyCode, false)
 
 	for i, line := range cn.Lines {
 		appendDocumentLine(root, "CreditNoteLine", "CreditedQuantity", i+1, line, cn.CurrencyCode, cn.DocumentTypeCode, cn.Supplier.Identification, "")

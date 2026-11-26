@@ -82,7 +82,7 @@ func BuildInvoice(inv domain.Document) (*etree.Document, error) {
 	appendAllowanceCharges(root, inv.AllowanceCharges, inv.CurrencyCode)
 	appendTaxTotal(root, inv.HeaderTaxes, inv.CurrencyCode)
 	appendWithholdingTaxTotal(root, inv.WithholdingTaxes, inv.CurrencyCode, false)
-	appendMonetaryTotal(root, "LegalMonetaryTotal", inv.Totals, inv.CurrencyCode, inv.DocumentTypeCode)
+	appendMonetaryTotal(root, "LegalMonetaryTotal", inv.Totals, inv.CurrencyCode, true)
 
 	for i, line := range inv.Lines {
 		// mandanteID does not apply to Invoice (only notes use it); passed empty.

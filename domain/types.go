@@ -150,7 +150,11 @@ type Totals struct {
 	// and charges (rules FAU08 and FAU10). Only serialized when > 0.
 	AllowanceTotalCents int64
 	ChargeTotalCents    int64
-	PrepaidCents        int64 // only serialized when > 0 and the document is an Invoice
+	// PrepaidCents is cbc:PrepaidAmount, the sum of the PrepaidPayments (DIAN rejects any
+	// other value, e.g. rule DEAU12 of the Documento Equivalente annex). Only serialized when > 0 and the document is built with BuildInvoice,
+	// whatever its type code: invoices and every Documento Equivalente. Notes and the Support
+	// Document leave it out.
+	PrepaidCents int64
 
 	// RoundingCents is cbc:PayableRoundingAmount — the only monetary field the Technical Annex
 	// allows to be negative (e.g. rounding a POS total to the nearest 50/100 pesos). Only

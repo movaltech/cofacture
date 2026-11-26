@@ -78,7 +78,7 @@ func BuildAdjustmentNote(an domain.AdjustmentNote) (*etree.Document, error) {
 
 	appendTaxTotal(root, an.HeaderTaxes, an.CurrencyCode)
 	appendWithholdingTaxTotal(root, an.WithholdingTaxes, an.CurrencyCode, true)
-	appendMonetaryTotal(root, "LegalMonetaryTotal", an.Totals, an.CurrencyCode, an.DocumentTypeCode)
+	appendMonetaryTotal(root, "LegalMonetaryTotal", an.Totals, an.CurrencyCode, false)
 
 	linePeriodDate := an.PeriodStartDate
 	if linePeriodDate == "" {

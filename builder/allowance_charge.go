@@ -36,8 +36,8 @@ func appendAllowanceCharges(parent *etree.Element, acs []domain.AllowanceCharge,
 	}
 }
 
-// appendPrepaidPayments adds one cac:PrepaidPayment per advance payment (group FBD01). Only an
-// Invoice carries them.
+// appendPrepaidPayments adds one cac:PrepaidPayment per advance payment (group FBD01 of the
+// invoice annex, DEBD01 of the Documento Equivalente annex). Only BuildInvoice calls it.
 func appendPrepaidPayments(parent *etree.Element, payments []domain.PrepaidPayment, currency string) {
 	for _, p := range payments {
 		el := parent.CreateElement("cac:PrepaidPayment")
