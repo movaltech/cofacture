@@ -5,6 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.8.1] — 2026-11-25
+
+### Fixed
+
+- In the adjustment notes to a Documento Equivalente Electrónico (`"94"` credit, `"93"` debit),
+  a line's `cac:AllowanceCharge` went before its `cac:TaxTotal`, the order of `InvoiceLine`.
+  `CreditNoteLine` and `DebitNoteLine` put it after, as the invoice notes (`"91"`, `"92"`)
+  already did; DIAN rejects the other order with ZB01. The builder now chooses the position by
+  the line element, not by the document type code. Notes without line discounts or charges
+  build as before.
+
+### Documentation
+
+- `domain.SoftwareManufacturer.LegalName` (`RazonSocial`) says it is required on the POS
+  ticket. The annex marks it 0..1 in section 8.1 and 1..1 in the POS extension table (rules
+  DEAB43/DEAB44), and DIAN rejected a POS ticket without it in habilitación. The builder still
+  renders it only when set.
+- README: document coverage updated with what DIAN accepted in habilitación (credit and debit
+  notes, the POS ticket and its adjustment notes), the printed QR text, discounts and charges,
+  and `soap.HTTPError`.
+- CHANGELOG: the 2.4.0 entry now states its security fix, the 0.2.1 release (tagged but never
+  listed) has its entry, and the comparison links cover every release.
+
 ## [2.8.0] — 2026-11-25
 
 ### Added
@@ -77,6 +100,14 @@ project adheres to [Semantic Versioning](https://semver.org/).
   `FecNAS`, `HorNAS`, `ValNAS` and `ValTolNAS` on the note). `ValIva` adds up only the IVA
   (tax 01). Where the annex's example and its field definition differ (the example names the
   acquirer `NITABS`), the definition wins.
+
+### Security
+
+- The text that `qr.SupportDocumentContent` and `qr.AdjustmentNoteContent` returned carried
+  the software PIN, which is secret. Both now return the annex text, without the PIN, so their
+  output changed in this minor release: code that parsed or printed the old text gets the new
+  one. A PIN that was printed or stored in an XML before this release should be treated as
+  exposed.
 
 ### Deprecated
 
@@ -209,6 +240,18 @@ unchanged; to upgrade, run `go get github.com/movaltech/cofacture/v2` and replac
 
 - Module path is now `github.com/movaltech/cofacture`. No API changes from 0.2.0.
 
+## [0.2.1] — 2026-09-13
+
+### Deprecated
+
+- The module `github.com/diegofxm/cofacture` is deprecated in its `go.mod`: it moved to
+  `github.com/movaltech/cofacture`. No API changes from 0.2.0.
+
+### Added
+
+- GitHub Actions workflow (gofmt, go vet, build, tests with the race detector and coverage) and
+  its badge in the README.
+
 ## [0.2.0] — 2026-09-04
 
 ### Changed
@@ -282,6 +325,21 @@ Initial release.
   contract, for both habilitación and producción.
 - Response parser turning DIAN's validation output into a structured result.
 
+[2.8.1]: https://github.com/movaltech/cofacture/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/movaltech/cofacture/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/movaltech/cofacture/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/movaltech/cofacture/compare/v2.5.0...v2.6.0
+[2.5.0]: https://github.com/movaltech/cofacture/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/movaltech/cofacture/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/movaltech/cofacture/compare/v2.2.2...v2.3.0
+[2.2.2]: https://github.com/movaltech/cofacture/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/movaltech/cofacture/compare/v2.1.0...v2.2.1
+[2.2.0]: https://github.com/movaltech/cofacture/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/movaltech/cofacture/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/movaltech/cofacture/compare/v2.0.0...v2.0.1
+[2.0.0]: https://github.com/movaltech/cofacture/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/movaltech/cofacture/compare/v0.2.1...v1.0.0
+[0.2.1]: https://github.com/movaltech/cofacture/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/movaltech/cofacture/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/movaltech/cofacture/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/movaltech/cofacture/compare/v0.1.0...v0.1.1
