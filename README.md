@@ -14,6 +14,7 @@ A Go library for Colombian DIAN electronic invoicing: UBL 2.1 document generatio
 ## Features
 
 - **Full document coverage** — Electronic Sales Invoice, Credit Note, Debit Note, Support Document, Adjustment Note to the Support Document, Attached Document, the five RADIAN acceptance/rejection events, Individual Electronic Payroll, and Documento Equivalente Electrónico (POS ticket and its other sub-types).
+- **Discounts, charges, advance payments and withholdings** — `cac:AllowanceCharge` at line and document level, `cac:PrepaidPayment`, and `cac:WithholdingTaxTotal`, each placed where the schema of every document type puts it.
 - **XAdES-EPES signing** — inclusive C14N 1.0 canonicalization, RSA-SHA256, DIAN's fixed signature policy, built from PEM or PKCS#12 (`.p12`/`.pfx`) certificates.
 - **Hash formulas verified against DIAN's own published worked examples** (Technical Annex 1.9), not just internal regression tests — CUFE, CUDE, CUDS, and CUNE each have a dedicated test reproducing DIAN's official example.
 - **SOAP 1.2 + WS-Security client** implementing 16 operations of the `WcfDianCustomerServices` contract: `SendBillSync`, `SendBillAsync`, `SendBillAttachmentAsync`, `SendTestSetAsync`, `GetStatus`, `GetStatusZip`, `GetNumberingRange`, `SendNominaSync`, `SendNominaSyncTestSet`, `SendEventUpdateStatus`, `GetStatusEvent`, `GetAcquirer`, `GetXmlByDocumentKey`, `GetReferenceNotes`, `GetDocumentInfo`, `GetExchangeEmails`.
@@ -170,19 +171,23 @@ A Documento Equivalente Electrónico (e.g. a POS ticket) is `builder.BuildInvoic
 | Document | Type code(s) | DIAN certification status |
 |---|---|---|
 | Electronic Sales Invoice | `01` | Confirmed accepted in DIAN's certification (habilitación) environment |
-| Credit Note | `91` | Hash formula matches DIAN's official worked example |
-| Debit Note | `92` | Hash formula matches DIAN's official worked example |
+| Credit Note | `91` | Hash formula matches DIAN's official worked example; accepted in habilitación, including line and document discounts and charges |
+| Debit Note | `92` | Hash formula matches DIAN's official worked example; accepted in habilitación, including line and document discounts and charges |
 | Support Document | `05` | Built, signed, and submitted to DIAN's certification environment during testing |
 | Adjustment Note to the Support Document | `95` | Built, signed, and submitted to DIAN's certification environment during testing |
 | Attached Document (container for Invoice/Credit Note/Debit Note) | — | Built and independently signature-verified; delivered to the acquirer, not submitted to DIAN by design |
 | RADIAN events — Acuse de Recibo, Reclamo, Recibo del Bien, Aceptación Expresa, Aceptación Tácita | `030`–`034` | Built per the technical annex's field tables; not yet submitted |
 | Individual Electronic Payroll & Adjustment | `102`/`103`/`104` | Built and independently signature-verified; not yet submitted |
-| Documento Equivalente Electrónico (POS ticket, etc.) | `20`, `25`, ... | Supported via the Invoice/Credit Note/Debit Note builders with the applicable type code, with the POS extensions (software manufacturer, buyer benefits, cash register); not yet submitted |
+| Documento Equivalente Electrónico — POS ticket | `20` | Validated in habilitación with the POS extensions (software manufacturer, buyer benefits, cash register) |
+| Adjustment Notes to the Documento Equivalente (credit, debit) | `94`/`93` | Validated in habilitación (without line discounts or charges, whose order was fixed in 2.8.1) |
+| Documento Equivalente in contingency | `07`/`08` | Built per the annex (section 15); not yet submitted |
+| Other Documento Equivalente sub-types | `25`, `27`, ... | Supported via the Invoice/Credit Note/Debit Note builders with the applicable type code; not yet submitted |
 
 ### Design boundaries (not gaps)
 
 - **No catalog/reference-data validation** — tax types, unit codes, city/DANE codes, payment methods, etc. `cofacture` trusts the caller and only knows where a code goes in the XML, not whether it's valid.
-- **No graphic representation (RIDE/PDF) generator.** DIAN doesn't validate this over SOAP; it's outside this library's scope.
+- **No graphic representation (RIDE/PDF) generator.** DIAN doesn't validate this over SOAP; it's outside this library's scope. The `qr` package only gives the text the annexes define for the printed QR (`qr.InvoiceText`, `qr.NoteText`, `qr.SupportDocumentText`, `qr.AdjustmentNoteText`); drawing the code and the document is the caller's job.
+- **No required-field validation.** Where an annex makes a field mandatory, the doc comment says so; the builder renders what it is given.
 - **No orchestration layer.** No single "send a document" call — you own numbering, idempotency, retry logic, and persisting consecutive numbers.
 
 ---
@@ -211,10 +216,10 @@ Always pin an exact version in the URL (`@v1.0.0`) rather than tracking a branch
 | [`event`](./event) | Computes the CUDE for RADIAN events and holds their `ResponseCode` catalog and the Aceptación Tácita note template. |
 | [`payroll`](./payroll) | Builds `NominaIndividual` XML (a distinct, non-UBL schema) and computes the CUNE. |
 | [`securitycode`](./securitycode) | Computes `sts:SoftwareSecurityCode`. |
-| [`qr`](./qr) | Builds the QR URL/content required in each document type's graphic representation. |
+| [`qr`](./qr) | Builds the search URL that goes in `sts:QRCode` and the text of the QR printed on the graphic representation (invoice, notes, support document and its adjustment note). The text never carries the software PIN. |
 | [`signer`](./signer) | XAdES-EPES signing (C14N 1.0, RSA-SHA256) plus certificate/key loading (PEM and PKCS#12). |
 | [`zip`](./zip) | Packages signed XML into the ZIP format and file-naming convention DIAN's receiving service requires. |
-| [`soap`](./soap) | SOAP 1.2 + WS-Security client for `WcfDianCustomerServices` (habilitación and producción). |
+| [`soap`](./soap) | SOAP 1.2 + WS-Security client for `WcfDianCustomerServices` (habilitación and producción). A `soap:Fault` is a `*soap.Fault`; an HTTP failure without one (e.g. a 503) is a `*soap.HTTPError` with its status code, so the caller can apply DIAN's contingency rules. |
 | [`dian`](./dian) | Interprets DIAN's validation responses into a structured `Result` (rejections vs. notices, embedded `ApplicationResponse`, etc.). |
 | [`xml`](./xml) | Shared UBL/DIAN namespace constants. |
 

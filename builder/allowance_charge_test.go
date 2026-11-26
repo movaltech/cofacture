@@ -81,6 +81,8 @@ func assertOrder(t *testing.T, xml string, elements []string) {
 
 // TestBuildNotes_AllowanceChargeOrder checks the positions the Credit and Debit Note schemas
 // give AllowanceCharge, which differ from the Invoice's (DIAN rejects other orders with ZB01).
+// The adjustment notes to an equivalent document ("94" credit, "93" debit) use the same schemas
+// and must follow the same order as the invoice notes ("91", "92").
 func TestBuildNotes_AllowanceChargeOrder(t *testing.T) {
 	base := sampleInvoice()
 	base.Lines[0].AllowanceCharges = []domain.AllowanceCharge{{Reason: "Descuento", Percent: decimal.MustParse("5"), AmountCents: 500, BaseAmountCents: 10000}}
@@ -88,34 +90,40 @@ func TestBuildNotes_AllowanceChargeOrder(t *testing.T) {
 	base.WithholdingTaxes = []domain.Tax{{TaxableAmountCents: 10000, TaxAmountCents: 250, Percent: decimal.MustParse("2.5"), TypeCode: "06", TypeName: "ReteFuente"}}
 	ref := domain.BillingReference{Prefix: "SETP", Number: "1", CUFE: "abc", IssueDate: "2026-11-19", HashType: "CUFE-SHA384"}
 
-	cnDoc := base
-	cnDoc.DocumentTypeCode = "91"
-	cn, err := BuildCreditNote(domain.CreditNote{Document: cnDoc, CreditNoteTypeCode: "91", BillingReference: ref})
-	if err != nil {
-		t.Fatal(err)
-	}
-	dnDoc := base
-	dnDoc.DocumentTypeCode = "92"
-	dn, err := BuildDebitNote(domain.DebitNote{Document: dnDoc, BillingReference: ref})
-	if err != nil {
-		t.Fatal(err)
-	}
-	for name, tree := range map[string]interface{ WriteToString() (string, error) }{"credit note": cn, "debit note": dn} {
-		xml, err := tree.WriteToString()
+	for _, codes := range []struct{ credit, debit string }{{"91", "92"}, {"94", "93"}} {
+		cnDoc := base
+		cnDoc.DocumentTypeCode = codes.credit
+		cn, err := BuildCreditNote(domain.CreditNote{Document: cnDoc, CreditNoteTypeCode: codes.credit, BillingReference: ref})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if strings.Contains(xml, "WithholdingTaxTotal") {
-			t.Errorf("%s: its schema has no WithholdingTaxTotal", name)
+		dnDoc := base
+		dnDoc.DocumentTypeCode = codes.debit
+		dn, err := BuildDebitNote(domain.DebitNote{Document: dnDoc, BillingReference: ref})
+		if err != nil {
+			t.Fatal(err)
 		}
-		lineNode := map[string]string{"credit note": "<cac:CreditNoteLine>", "debit note": "<cac:DebitNoteLine>"}[name]
-		line := xml[strings.Index(xml, lineNode):]
-		assertOrder(t, line, []string{"<cac:TaxTotal>", "<cac:AllowanceCharge>", "<cac:Item>"})
-		header := xml[:strings.Index(xml, lineNode)]
-		if name == "debit note" {
-			assertOrder(t, header, []string{"<cac:AccountingCustomerParty>", "<cac:AllowanceCharge>", "<cac:PaymentMeans>", "<cac:TaxTotal>"})
-		} else {
-			assertOrder(t, header, []string{"<cac:PaymentMeans>", "<cac:AllowanceCharge>", "<cac:TaxTotal>"})
+		for name, tree := range map[string]interface{ WriteToString() (string, error) }{"credit note " + codes.credit: cn, "debit note " + codes.debit: dn} {
+			xml, err := tree.WriteToString()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(xml, "WithholdingTaxTotal") {
+				t.Errorf("%s: its schema has no WithholdingTaxTotal", name)
+			}
+			isDebit := strings.HasPrefix(name, "debit")
+			lineNode := "<cac:CreditNoteLine>"
+			if isDebit {
+				lineNode = "<cac:DebitNoteLine>"
+			}
+			line := xml[strings.Index(xml, lineNode):]
+			assertOrder(t, line, []string{"<cac:TaxTotal>", "<cac:AllowanceCharge>", "<cac:Item>"})
+			header := xml[:strings.Index(xml, lineNode)]
+			if isDebit {
+				assertOrder(t, header, []string{"<cac:AccountingCustomerParty>", "<cac:AllowanceCharge>", "<cac:PaymentMeans>", "<cac:TaxTotal>"})
+			} else {
+				assertOrder(t, header, []string{"<cac:PaymentMeans>", "<cac:AllowanceCharge>", "<cac:TaxTotal>"})
+			}
 		}
 	}
 }

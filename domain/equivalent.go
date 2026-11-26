@@ -8,9 +8,17 @@ package domain
 // DEAB37-DEAB46): who made the software that generated the document. The builder renders it
 // only when set; whether a document needs it is the caller's decision.
 type SoftwareManufacturer struct {
-	Name         string // "NombreApellido": names and surnames of the manufacturer (required by the annex)
-	LegalName    string // "RazonSocial": legal name of the manufacturer (optional; omitted when empty)
-	SoftwareName string // "NombreSoftware": name of the software (required by the annex)
+	// Name is "NombreApellido": names and surnames of the manufacturer (required by the annex).
+	Name string
+
+	// LegalName is "RazonSocial", the legal name of the manufacturer; omitted when empty. Section
+	// 8.1 and the general table of 8.2 mark it 0..1, but the POS extension table of 8.2 marks it
+	// 1..1 (DEAB43/DEAB44) and DIAN rejected a POS ticket without it in habilitación: set it on
+	// every POS ticket.
+	LegalName string
+
+	// SoftwareName is "NombreSoftware": name of the software (required by the annex).
+	SoftwareName string
 }
 
 // POSBuyerBenefits is the BeneficiosComprador extension of the POS ticket (InvoiceTypeCode

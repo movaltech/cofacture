@@ -64,15 +64,17 @@ func appendDocumentLine(parent *etree.Element, node, nodeQty string, index int, 
 	}
 
 	// InvoiceLine has AllowanceCharge before TaxTotal; CreditNoteLine and DebitNoteLine have it
-	// after (UBL 2.1 schemas; DIAN rejected the other order with ZB01). The Support Document
-	// and its Adjustment Note carry none.
-	isNote := documentTypeCode == "91" || documentTypeCode == "92"
+	// after (UBL 2.1 schemas; DIAN rejected the other order with ZB01). The order follows the
+	// node, not the document type code: the adjustment notes to an equivalent document ("93",
+	// "94") are CreditNoteLine/DebitNoteLine too. The Support Document and its Adjustment Note
+	// carry none.
+	afterTaxTotal := node != "InvoiceLine"
 	withAllowances := documentTypeCode != "05" && documentTypeCode != "95"
-	if withAllowances && !isNote {
+	if withAllowances && !afterTaxTotal {
 		appendAllowanceCharges(el, line.AllowanceCharges, currency)
 	}
 	appendTaxTotal(el, line.Taxes, currency)
-	if withAllowances && isNote {
+	if withAllowances && afterTaxTotal {
 		appendAllowanceCharges(el, line.AllowanceCharges, currency)
 	}
 
